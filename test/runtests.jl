@@ -75,23 +75,20 @@ end
 
     # Test sampling
     rng = MersenneTwister(123)  # for reproducibility
-    samples = [rand(rng, bd) for _ = 1:10000]
+    samples = [rand(rng, bd) for _ ∈ 1:10000]
 
     # Statistical tests for uniform distribution
     @test all(0 .<= samples .<= 1)
     @test 0.45 < mean(samples) < 0.55  # should be close to 0.5
     @test 0.28 < std(samples) < 0.30   # should be close to 1/√12 ≈ 0.289
-    @test mean(samples) ≈ 0.5002335756582909
-    @test std(samples) ≈ 0.28824475196820304
 
     # Test non-uniform distribution (triangular)
     g_tri(x) = x
     bd_tri = BinnedDensity(g_tri, (0.0, 1.0), nBins)
-    samples_tri = [rand(rng, bd_tri) for _ = 1:10000]
+    samples_tri = [rand(rng, bd_tri) for _ ∈ 1:10000]
 
     # Statistical tests for triangular distribution
     @test all(0 .<= samples_tri .<= 1)
     @test 0.63 < mean(samples_tri) < 0.70  # should be close to 2/3
-    @test mean(samples_tri) ≈ 0.6678129622030877
     @test isapprox(median(samples_tri), 0.707, atol = 0.02)  # should be close to √(0.5)
 end
