@@ -10,20 +10,26 @@ using Random
     f(x) = exp(-x^2 / 2) * (abs(x) < 2)
     d = NumericallyIntegrable(f, (-2, 2))
 
+    # is a distribution
+    @test d isa ContinuousUnivariateDistribution
+    @test NumericallyIntegrable(f, (-2, 2.0)) ==
+          NumericallyIntegrable(f, (-2.0, 2))
+
     # Test normalization
-    total_prob, err = quadgk(x -> pdf(d, x), -2, 2)
-    @test isapprox(total_prob, 1.0, rtol = 1e-6)
+    total_prob = quadgk(x -> pdf(d, x), -2, 2)[1]
+    @test total_prob ≈ 1.0
 
     # Test PDF properties
     @test pdf(d, -3) == 0.0  # outside support
     @test pdf(d, 3) == 0.0   # outside support
-    @test pdf(d, 0) > pdf(d, 1)  # peak at center
+    @test pdf(d, 0) > pdf(d, 0.001) # peaks at zero
+    @test pdf(d, 0) > 1 / sqrt(2π) # because of cutoff
 
     # Test CDF properties
     @test cdf(d, -3) == 0.0
     @test cdf(d, 3) == 1.0
     @test 0 < cdf(d, 0) < 1
-    @test cdf(d, 1) > cdf(d, 0)  # monotonicity
+    @test cdf(d, 1) > cdf(d, 0) # monotonicity
 end
 
 @testset "Sampling" begin
@@ -76,6 +82,8 @@ end
     @test all(0 .<= samples .<= 1)
     @test 0.45 < mean(samples) < 0.55  # should be close to 0.5
     @test 0.28 < std(samples) < 0.30   # should be close to 1/√12 ≈ 0.289
+    @test mean(samples) ≈ 0.5002335756582909
+    @test std(samples) ≈ 0.28824475196820304
 
     # Test non-uniform distribution (triangular)
     g_tri(x) = x
@@ -85,5 +93,6 @@ end
     # Statistical tests for triangular distribution
     @test all(0 .<= samples_tri .<= 1)
     @test 0.63 < mean(samples_tri) < 0.70  # should be close to 2/3
+    @test mean(samples_tri) ≈ 0.6678129622030877
     @test isapprox(median(samples_tri), 0.707, atol = 0.02)  # should be close to √(0.5)
 end
