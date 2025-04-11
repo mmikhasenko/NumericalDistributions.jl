@@ -14,11 +14,11 @@ via integration and implements sampling through numerical CDF inversion.
 module NumericalDistributions
 
 using Distributions
-using Distributions.Random
-using Distributions.QuadGK
+using Random
+using QuadGK
 
 export NumericallyIntegrable
-export binned1dDensity, getbinned1dDensity
+export BinnedDensity
 
 include("types.jl")
 include("sampling.jl")

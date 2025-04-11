@@ -1,5 +1,5 @@
 """
-    binned1dDensity{T}
+    BinnedDensity{T}
 
 A type representing a binned approximation of a 1D probability density function.
 Used internally for efficient sampling from NumericallyIntegrable distributions.
@@ -8,13 +8,13 @@ Used internally for efficient sampling from NumericallyIntegrable distributions.
 - `grid::Vector{Float64}`: The bin edges
 - `cumarr::Vector{T}`: The cumulative probabilities at bin edges
 """
-struct binned1dDensity{T}
+struct BinnedDensity{T}
     grid::Vector{Float64}
     cumarr::Vector{T}
 end
 
 """
-    getbinned1dDensity(g, lims, nBins)
+    BinnedDensity(g, lims, nBins)
 
 Create a binned representation of a 1D probability density function.
 
@@ -24,18 +24,18 @@ Create a binned representation of a 1D probability density function.
 - `nBins`: Number of bins to use
 
 # Returns
-- `binned1dDensity`: A binned representation of the PDF
+- `BinnedDensity`: A binned representation of the PDF
 """
-function getbinned1dDensity(g, lims, nBins)
+function BinnedDensity(g, lims, nBins)
     grid = collect(range(lims..., nBins))
     bin_centers = (grid[2:end] .+ grid[1:end-1]) ./ 2
     unnorm_weights = map(g, bin_centers)
     weights = unnorm_weights ./ sum(unnorm_weights)
     cumarr = pushfirst!(cumsum(vcat(weights...), dims = 1), 0)
-    return binned1dDensity(grid, cumarr)
+    return BinnedDensity(grid, cumarr)
 end
 
-function Base.rand(rng::AbstractRNG, bD::binned1dDensity)
+function Base.rand(rng::AbstractRNG, bD::BinnedDensity)
     binind = findfirst(bD.cumarr .> rand(rng)) - 1
     σl, σr = bD.grid[binind], bD.grid[binind+1]
     σ = σl + rand(rng) * (σr - σl)
@@ -53,7 +53,7 @@ before binning.
 """
 function Base.rand(rng::AbstractRNG, d::NumericallyIntegrable, n::Int64 = 1)
     if all(isfinite.(d.support))
-        bD = getbinned1dDensity(
+        bD = BinnedDensity(
             x -> d.unnormalized_pdf(x),
             d.support,
             d.n_sampling_bins)
@@ -63,7 +63,7 @@ function Base.rand(rng::AbstractRNG, d::NumericallyIntegrable, n::Int64 = 1)
     # For infinite support, use tangent transformation
     x(z) = tan(z * π / 2)
     z(x) = atan(x) * 2 / π
-    bD = getbinned1dDensity(
+    bD = BinnedDensity(
         z -> d.unnormalized_pdf(x(z)) / cos(z * π / 2)^2,
         (-1, 1),
         d.n_sampling_bins)
