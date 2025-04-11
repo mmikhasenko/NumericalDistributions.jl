@@ -27,7 +27,8 @@ Create a binned representation of a 1D probability density function.
 - `BinnedDensity`: A binned representation of the PDF
 """
 function BinnedDensity(g, lims, nBins)
-    grid = collect(range(lims..., nBins))
+    # Create nBins + 1 points to have the correct number of bin edges
+    grid = collect(range(lims..., length = nBins + 1))
     bin_centers = (grid[2:end] .+ grid[1:end-1]) ./ 2
     unnorm_weights = map(g, bin_centers)
     weights = unnorm_weights ./ sum(unnorm_weights)
