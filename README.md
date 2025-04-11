@@ -19,8 +19,8 @@ A Julia package for working with user-defined continuous univariate distribution
 ## Installation
 
 ```julia
-using Pkg
-Pkg.add("NumericalDistributions")
+julia> ]
+pkg> add https://github.com/mmikhasenko/NumericalDistributions.jl
 ```
 
 ## Usage
