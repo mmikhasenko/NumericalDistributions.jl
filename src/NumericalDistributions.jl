@@ -1,5 +1,5 @@
 """
-    NumericallyInvertibleDistributions
+    NumericalDistributions
 
 A Julia package for working with user-defined continuous univariate distributions
 where the PDF is specified numerically. The package handles normalization automatically
@@ -11,11 +11,11 @@ via integration and implements sampling through numerical CDF inversion.
 - Efficient sampling through binned CDF inversion
 - Support for both finite and infinite support ranges
 """
-module NumericallyInvertibleDistributions
+module NumericalDistributions
 
 using Distributions
-using Random
-using QuadGK
+using Distributions.Random
+using Distributions.QuadGK
 
 export NumericallyIntegrable
 export binned1dDensity, getbinned1dDensity

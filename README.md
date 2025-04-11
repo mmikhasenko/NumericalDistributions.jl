@@ -1,4 +1,4 @@
-# NumericallyInvertibleDistributions.jl
+# NumericalDistributions.jl
 
 A Julia package for working with user-defined continuous univariate distributions where the PDF is specified numerically. The package handles normalization automatically via integration and implements sampling through numerical CDF inversion.
 
@@ -14,7 +14,7 @@ A Julia package for working with user-defined continuous univariate distribution
 
 ```julia
 using Pkg
-Pkg.add("NumericallyInvertibleDistributions")
+Pkg.add("NumericalDistributions")
 ```
 
 ## Usage
@@ -22,7 +22,7 @@ Pkg.add("NumericallyInvertibleDistributions")
 Here's a simple example of creating and using a custom distribution:
 
 ```julia
-using NumericallyInvertibleDistributions
+using NumericalDistributions
 
 # Define a custom distribution (truncated normal distribution)
 f(x) = exp(-x^2/2) * (abs(x) < 2)
