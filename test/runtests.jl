@@ -12,8 +12,7 @@ using Random
 
     # is a distribution
     @test d isa ContinuousUnivariateDistribution
-    @test NumericallyIntegrable(f, (-2, 2.0)) ==
-          NumericallyIntegrable(f, (-2.0, 2))
+    @test NumericallyIntegrable(f, (-2, 2.0)) == NumericallyIntegrable(f, (-2.0, 2))
 
     # Test normalization
     total_prob = quadgk(x -> pdf(d, x), -2, 2)[1]
@@ -76,7 +75,7 @@ end
 
     # Test sampling
     rng = MersenneTwister(123)  # for reproducibility
-    samples = [rand(rng, bd) for _ in 1:10000]
+    samples = [rand(rng, bd) for _ = 1:10000]
 
     # Statistical tests for uniform distribution
     @test all(0 .<= samples .<= 1)
@@ -88,7 +87,7 @@ end
     # Test non-uniform distribution (triangular)
     g_tri(x) = x
     bd_tri = BinnedDensity(g_tri, (0.0, 1.0), nBins)
-    samples_tri = [rand(rng, bd_tri) for _ in 1:10000]
+    samples_tri = [rand(rng, bd_tri) for _ = 1:10000]
 
     # Statistical tests for triangular distribution
     @test all(0 .<= samples_tri .<= 1)
