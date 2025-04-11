@@ -37,7 +37,7 @@ f(x) = 1/abs2(m^2-x^2-1im*m*Γ)
 dist = NumericallyIntegrable(f, (0.3, 1.5))
 
 # The PDF is automatically normalized
-pdf(dist, 0)  # returns the probability density at x=0
+pdf(dist, 0.77)  # returns the probability density at x=0.77
 
 # Generate random samples
 samples = rand(dist, 1000)
