@@ -1,5 +1,11 @@
 # NumericalDistributions.jl
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://github.com/mmikhasenko/NumericalDistributions.jl/workflows/Test/badge.svg)](https://github.com/mmikhasenko/NumericalDistributions.jl/actions)
+[![Lint workflow Status](https://github.com/mmikhasenko/NumericalDistributions.jl/actions/workflows/Lint.yml/badge.svg?branch=main)](https://github.com/mmikhasenko/NumericalDistributions.jl/actions/workflows/Lint.yml?query=branch%3Amain)
+[![Coverage](https://codecov.io/gh/mmikhasenko/NumericalDistributions.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/mmikhasenko/NumericalDistributions.jl)
+
+
 A Julia package for working with user-defined continuous univariate distributions where the PDF is specified numerically. The package handles normalization automatically via integration and implements sampling through numerical CDF inversion.
 
 ## Features
@@ -24,8 +30,8 @@ Here's a simple example of creating and using a custom distribution:
 ```julia
 using NumericalDistributions
 
-# Define a custom distribution (truncated normal distribution)
-f(x) = exp(-x^2/2) * (abs(x) < 2)
+# Define a custom distribution
+f(x) = exp(-x^4)
 dist = NumericallyIntegrable(f, (-2, 2))
 
 # The PDF is automatically normalized
@@ -40,7 +46,7 @@ cdf(dist, 1.0)  # returns the cumulative probability at x=1.0
 
 ## Implementation Details
 
-The package uses numerical integration (via QuadGK.jl) to normalize the PDF and compute the CDF. For sampling, it uses a binned approximation of the CDF inversion method:
+The package uses numerical integration (via `QuadGK.jl`) to normalize the PDF and compute the CDF. For sampling, it uses a binned approximation of the CDF inversion method:
 
 1. The support range is divided into bins
 2. The PDF is evaluated at bin centers and normalized
