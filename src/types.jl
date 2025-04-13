@@ -19,9 +19,9 @@ dist = NumericallyIntegrable(f, (-2, 2))
 samples = rand(dist, 1000)
 ```
 """
-struct NumericallyIntegrable{F, T <: Real} <: ContinuousUnivariateDistribution
+struct NumericallyIntegrable{F, T <: Real, I} <: ContinuousUnivariateDistribution
     unnormalized_pdf::F
-    integral::Float64
+    integral::I
     support::Tuple{T, T}
     n_sampling_bins::Int
 
@@ -29,7 +29,8 @@ struct NumericallyIntegrable{F, T <: Real} <: ContinuousUnivariateDistribution
         integral = quadgk(f, support...)[1]
         F = typeof(f)
         T = eltype(support)
-        new{F, T}(f, integral, support, n_sampling_bins)
+        I = eltype(integral)
+        new{F, T, I}(f, integral, support, n_sampling_bins)
     end
 end
 

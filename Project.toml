@@ -1,7 +1,7 @@
 name = "NumericalDistributions"
 uuid = "13416b18-ec19-40e4-a123-e345ab61da74"
 authors = ["Mikhail Mikhasenko <mikhail.mikhasenko@cern.ch>"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
