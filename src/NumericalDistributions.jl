@@ -20,7 +20,12 @@ using QuadGK
 export NumericallyIntegrable
 export BinnedDensity
 
+import Distributions.Statistics: mean, var
+import Distributions.StatsBase: kurtosis, skewness
+import Distributions: pdf, cdf, minimum, maximum
+
 include("types.jl")
+include("moments.jl")
 include("sampling.jl")
 
 end # module
