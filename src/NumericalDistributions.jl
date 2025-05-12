@@ -13,7 +13,9 @@ via integration and implements sampling through numerical CDF inversion.
 """
 module NumericalDistributions
 
+using Interpolations
 using Distributions
+using Parameters
 using Random
 using QuadGK
 
@@ -27,5 +29,8 @@ import Distributions: pdf, cdf, minimum, maximum
 include("types.jl")
 include("moments.jl")
 include("sampling.jl")
+
+export Interpolated
+include("interpolated.jl")
 
 end # module

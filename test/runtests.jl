@@ -1,4 +1,5 @@
 using NumericalDistributions
+using Interpolations
 using Distributions
 using Statistics
 using Random
@@ -114,4 +115,27 @@ end
     @test isapprox(std(d_uniform), sqrt(1 / 3), atol = 1e-7)
     @test isapprox(skewness(d_uniform), 0.0, atol = 1e-7)
     @test isapprox(kurtosis(d_uniform), -1.2, atol = 1e-7) # Excess kurtosis for uniform is -6/5
+end
+
+a = Interpolated(x -> abs(x), -2:0.5:1; degree = Constant())
+# plot(x -> pdf(a, x), -2, 2, fill = 0, fillalpha = 0.3, label = "PDF")
+# plot(x -> cdf(a, x), -2, 2, fill = 0, fillalpha = 0.3, label = "CDF")
+@testset "Interpolated linear" begin
+    @test pdf(a, 0.4) ≈ 0.2
+    @test cdf(a, -2.0) == 0.0
+    @test cdf(a, 2.0) == 1.0
+    @test pdf(a, -0.5) ≈ 0.2
+    @test cdf(a, 0.0) ≈ 0.8
+    a.integral ≈ 2.5
+end
+
+b = Interpolated(x -> abs(x), -2:0.5:1; degree = Linear())
+# plot(x -> pdf(b, x), -2, 2, fill = 0, fillalpha = 0.3, label = "PDF")
+# plot(x -> cdf(b, x), -2, 2, fill = 0, fillalpha = 0.3, label = "CDF")
+@testset "Interpolated linear" begin
+    @test pdf(b, 0.4) ≈ 0.16
+    @test cdf(b, -2.0) == 0.0
+    @test cdf(b, 2.0) == 1.0
+    @test cdf(b, 0.0) ≈ 0.8
+    @test b.integral ≈ 2.5
 end
