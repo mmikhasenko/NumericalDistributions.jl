@@ -1,3 +1,16 @@
+"""
+    Interpolated(f, binedges; degree = Linear())
+
+Create a distribution using interpolation of a function over a grid of points.
+
+# Arguments
+- `f`: The function to be interpolated
+- `binedges::AbstractVector`: Grid points for interpolation
+- `degree`: Interpolation type, either `Linear()` or `Constant()`
+
+# Returns
+- `NumericallyIntegrable`: A distribution based on the interpolated function
+"""
 function Interpolated(f, binedges::AbstractVector; degree = Linear())
     yv_unnorm = f.(binedges)
     NumericallyIntegrable(
@@ -7,17 +20,40 @@ function Interpolated(f, binedges::AbstractVector; degree = Linear())
     )
 end
 
+"""
+    InterpolatedLinear
+
+Type alias for a NumericallyIntegrable distribution that uses linear interpolation.
+"""
 const InterpolatedLinear = NumericallyIntegrable{Interpolations.GriddedInterpolation{T, N, TC, Gridded{ST}, K}, IT, IntT} where {T, N, TC, ST <: Interpolations.Linear, K, IT <: Real, IntT <: Real}
+
+"""
+    InterpolatedConstant
+
+Type alias for a NumericallyIntegrable distribution that uses constant interpolation.
+"""
 const InterpolatedConstant = NumericallyIntegrable{Interpolations.GriddedInterpolation{T, N, TC, Gridded{ST}, K}, IT, IntT} where {T, N, TC, ST <: Interpolations.Constant, K, IT <: Real, IntT <: Real}
 
 
+"""
+    cdf(d::InterpolatedConstant, x::Real)
+
+Compute the cumulative distribution function for a distribution with constant interpolation using an analytic expression for integral.
+
+# Arguments
+- `d::InterpolatedConstant`: The distribution
+- `x::Real`: The point at which to evaluate the CDF
+
+# Returns
+- The CDF value at point x
+"""
 function Distributions.cdf(d::InterpolatedConstant, x::Real)
     itr = d.unnormalized_pdf
     grid = itr.knots[1]
     values = itr.coefs
     n = length(grid)
 
-    # Construct bin edges
+    # Construct bin edges - these are not equally spaced
     edges = Vector{eltype(grid)}(undef, n + 1)
     edges[1] = grid[1]
     for i in 2:n
@@ -40,6 +76,18 @@ function Distributions.cdf(d::InterpolatedConstant, x::Real)
 end
 
 
+"""
+    cdf(d::InterpolatedLinear, x::Real)
+
+Compute the cumulative distribution function for a distribution with linear interpolation using an analytic expression for integral.
+
+# Arguments
+- `d::InterpolatedLinear`: The distribution
+- `x::Real`: The point at which to evaluate the CDF
+
+# Returns
+- The CDF value at point x
+"""
 function Distributions.cdf(d::InterpolatedLinear, x::Real)
     itr = d.unnormalized_pdf
     grid = itr.knots[1]
