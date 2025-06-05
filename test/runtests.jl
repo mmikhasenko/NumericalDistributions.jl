@@ -120,13 +120,13 @@ end
 a = Interpolated(x -> abs(x), -2:0.5:1; degree = Constant())
 # plot(x -> pdf(a, x), -2, 2, fill = 0, fillalpha = 0.3, label = "PDF")
 # plot(x -> cdf(a, x), -2, 2, fill = 0, fillalpha = 0.3, label = "CDF")
-@testset "Interpolated linear" begin
+@testset "Interpolated constant" begin
     @test pdf(a, 0.4) ≈ 0.2
     @test cdf(a, -2.0) == 0.0
     @test cdf(a, 2.0) == 1.0
     @test pdf(a, -0.5) ≈ 0.2
     @test cdf(a, 0.0) ≈ 0.8
-    a.integral ≈ 2.5
+    @test a.integral ≈ 2.5
 end
 
 b = Interpolated(x -> abs(x), -2:0.5:1; degree = Linear())
