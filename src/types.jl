@@ -29,7 +29,7 @@ struct NumericallyIntegrable{F, T <: Real, I} <: ContinuousUnivariateDistributio
         integral = quadgk(f, support...)[1]
         F = typeof(f)
         T = eltype(support)
-        I = eltype(integral)
+        I = typeof(integral)
         new{F, T, I}(f, integral, support, n_sampling_bins)
     end
 end
