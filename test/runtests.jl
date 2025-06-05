@@ -5,6 +5,7 @@ using Statistics
 using Random
 using QuadGK
 using Test
+using ForwardDiff
 
 @testset "Basic functionality" begin
     # Test with a simple normal distribution truncated to [-2, 2]
@@ -138,4 +139,9 @@ b = Interpolated(x -> abs(x), -2:0.5:1; degree = Linear())
     @test cdf(b, 2.0) == 1.0
     @test cdf(b, 0.0) ≈ 0.8
     @test b.integral ≈ 2.5
+end
+@testset "typeof vs eltype" begin
+    g(x, p) = p * x
+    h(p) = NumericallyIntegrable(x -> g(x, p), (0.0, 1.0)).integral
+    @test isapprox(ForwardDiff.derivative(h, 2.0), 0.5; atol = 1e-12)
 end
