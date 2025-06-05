@@ -5,7 +5,7 @@ A continuous univariate distribution defined by an unnormalized probability dens
 
 # Fields
 - `unnormalized_pdf::F`: The unnormalized probability density function
-- `integral::Float64`: The normalization constant (integral of the PDF)
+- `integral::I`: The normalization constant (integral of the PDF)
 - `support::S`: The support range of the distribution (default: (-Inf, Inf))
 - `n_sampling_bins::Int`: Number of bins used for sampling approximation
 
