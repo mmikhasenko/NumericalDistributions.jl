@@ -13,6 +13,7 @@ via integration and implements sampling through numerical CDF inversion.
 """
 module NumericalDistributions
 
+using FFTW
 using Interpolations
 using Distributions
 using Parameters
@@ -30,7 +31,10 @@ include("types.jl")
 include("moments.jl")
 include("sampling.jl")
 
-export Interpolated
+export Interpolated, InterpolatedLinear, InterpolatedConstant
 include("interpolated.jl")
+
+export convolve_pdf
+include("convolution.jl")
 
 end # module
