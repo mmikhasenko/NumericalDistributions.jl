@@ -34,7 +34,9 @@ include("sampling.jl")
 export Interpolated, InterpolatedLinear, InterpolatedConstant
 include("interpolated.jl")
 
-export convolve_vectors, convolve_pdfs
+export fft_convolve
 include("convolution.jl")
+
+export pdf, cdf
 
 end # module

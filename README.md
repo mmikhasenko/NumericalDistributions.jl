@@ -65,6 +65,46 @@ pdf(b, 0.4)  # Evaluates PDF with linear interpolation
 cdf(b, 0.0)  # Computes CDF with linear interpolation
 ```
 
+## Numerical Convolution of PDFs (via FFTW)
+
+NumericalDistributions.jl supports fast convolution of user-defined, numerically specified probability density functions (PDFs) using the Fast Fourier Transform (FFTW). This allows you to compute the PDF of the sum of two independent random variables, each with a numerically defined distribution.
+
+### Available Functions
+
+- `fft_convolve(d1, d2; ...)`: Convolve any two distributions (subtypes of `ContinuousUnivariateDistribution`). Automatically samples both on a common grid and returns the convolution as a NumericallyIntegrable distribution.
+
+### Example: Convolution of Two PDFs
+
+```julia
+using NumericalDistributions
+
+# Define two custom PDFs on different supports
+x1 = -2:0.01:2
+x2 = -1:0.01:8
+f1(x) = exp(-x^4)                    # Even, super-Gaussian
+f2(x) = 1 / ((x - 3)^2 + 1)          # Cauchy-like, centered at 3
+
+# Create interpolated distributions
+A = Interpolated(f1, x1)
+B = Interpolated(f2, x2)
+
+# Convolve the two distributions
+C = fft_convolve(A, B)
+
+# Evaluate the resulting PDF at a point
+pdf(C, 2.0)
+
+# Plot the resulting PDF
+using Plots
+plot(x->pdf(C, x), 1, 5, yscale=:log10, ylim=(1e-3, 1))
+```
+
+- The result is a new numerically specified PDF on an extended grid, wrapped as a `NumericallyIntegrable` distribution.
+- Both input PDFs must be normalized (integrate to 1) and have finite support.
+- The convolution uses FFTW for efficiency and supports both vector and distribution types.
+
+See the docstring for `fft_convolve` for more details and options.
+
 ## Implementation Details
 
 The package uses numerical integration (via `QuadGK.jl`) to normalize the PDF and compute the CDF. For sampling, it uses a binned approximation of the CDF inversion method with a linear interpolation scheme.

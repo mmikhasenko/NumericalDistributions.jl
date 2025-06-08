@@ -161,8 +161,7 @@ end
         (uni_support[2] - uni_support[1])
 
     # Vector API
-    conv_interp =
-        convolve_vectors(yv_pdf1, yv_pdf2; Δ = Δ, t0_1 = first(x1), t0_2 = first(x2))
+    conv_interp = fft_convolve(yv_pdf1, yv_pdf2; Δ = Δ, t0_1 = first(x1), t0_2 = first(x2))
 
     # Test normalization - integral of the any pdf should be 1
     @test cdf(conv_interp, conv_interp.support[2]) ≈ 1.0
@@ -180,17 +179,17 @@ end
 end
 
 @testset "Convolution with Distributions" begin
-
+    Δ = 0.01
     # Uniform and Normal distributions
-    d1 = truncated(Uniform(-0.5, 3.5), -1, 4.0)
+    d1 = Uniform(-0.5, 3.5)
     d2 = truncated(Normal(0, 0.3), -2, 2)
 
     # Analytical convolution: Uniform + Normal
     conv_analytical(x) =
         (cdf(Normal(-0.5, 0.3), x) - cdf(Normal(3.5, 0.3), x)) / (3.5 + 0.5)
 
-    # Use the new convolve_pdfs API
-    conv_dist = convolve_pdfs(d1, d2; gridsize = 1000)
+    # Use the new fft_convolve API
+    conv_dist = fft_convolve(d1, d2; gridsize = 1000)
 
     # Test normalization
     @test cdf(conv_dist, conv_dist.support[2]) ≈ 1.0
@@ -204,6 +203,6 @@ end
 
     # Test error for infinite support
     d2′ = Normal(0, 0.3)
-    @test_throws ErrorException convolve_pdfs(d1, d2′; gridsize = 1000)
+    @test_throws ErrorException fft_convolve(d1, d2′; gridsize = 1000)
 end
 
