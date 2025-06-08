@@ -179,3 +179,27 @@ end
     end
 end
 
+@testset "Convolution with Distributions" begin
+    Δ = 0.01
+    # Uniform and Normal distributions
+    d1 = truncated(Uniform(-0.5, 3.5), -1, 4.0)
+    d2 = truncated(Normal(0, 0.3), -2, 2)
+
+    # Analytical convolution: Uniform + Normal
+    conv_analytical(x) =
+        (cdf(Normal(-0.5, 0.3), x) - cdf(Normal(3.5, 0.3), x)) / (3.5 + 0.5)
+
+    # Use the new convolve_pdfs API
+    conv_dist = convolve_pdfs(d1, d2; gridsize = 1000)
+
+    # Test normalization
+    @test cdf(conv_dist, conv_dist.support[2]) ≈ 1.0
+
+    # Test against analytical at a few points
+    for x in range(-1, 4, length = 5)
+        v = pdf(conv_dist, x)
+        u = conv_analytical(x)
+        @test isapprox(v, u; atol = 4e-4)
+    end
+end
+
