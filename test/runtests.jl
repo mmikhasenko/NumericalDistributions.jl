@@ -180,7 +180,7 @@ end
 end
 
 @testset "Convolution with Distributions" begin
-    Δ = 0.01
+
     # Uniform and Normal distributions
     d1 = truncated(Uniform(-0.5, 3.5), -1, 4.0)
     d2 = truncated(Normal(0, 0.3), -2, 2)
@@ -201,5 +201,9 @@ end
         u = conv_analytical(x)
         @test isapprox(v, u; atol = 4e-4)
     end
+
+    # Test error for infinite support
+    d2′ = Normal(0, 0.3)
+    @test_throws ErrorException convolve_pdfs(d1, d2′; gridsize = 1000)
 end
 
