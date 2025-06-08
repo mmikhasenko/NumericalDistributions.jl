@@ -6,13 +6,13 @@ using InteractiveUtils
 
 # ╔═╡ c073bfc3-e473-4c58-a7cf-15777c90d15c
 begin
-	using Pkg
-	Pkg.activate(joinpath(@__DIR__,".."))
-	Pkg.instantiate()
-	# 
-	using NumericalDistributions
-	# using NumericalDistributions.Distributions
-	using Plots
+    using Pkg
+    Pkg.activate(joinpath(@__DIR__, ".."))
+    Pkg.instantiate()
+    # 
+    using NumericalDistributions
+    # using NumericalDistributions.Distributions
+    using Plots
 end
 
 # ╔═╡ 7e78061f-e2b2-41be-bf60-a7b3acf1675d
@@ -20,9 +20,9 @@ theme(:boxed)
 
 # ╔═╡ aa4d233a-9b00-495d-aa62-94b35d7385e6
 begin
-	# Define two custom PDFs on different supports
-	x1 = -2:0.01:2
-	x2 = -1:0.01:8
+    # Define two custom PDFs on different supports
+    x1 = -2:0.01:2
+    x2 = -1:0.01:8
 end
 
 # ╔═╡ ee2d7f4d-ba1b-4bd7-aa56-5db35e8fcd40
@@ -50,7 +50,7 @@ C = fft_convolve(A, B);
 pdf(C, 2.0)
 
 # ╔═╡ ae035511-1a07-4cd0-8327-87dc46466917
-plot(x->pdf(C, x), -3, 11, yscale=:log10, ylim=(1e-3, 1))
+plot(x -> pdf(C, x), -3, 11, yscale = :log10, ylim = (1e-3, 1))
 
 # ╔═╡ Cell order:
 # ╠═c073bfc3-e473-4c58-a7cf-15777c90d15c

@@ -24,7 +24,7 @@ Numerically convolve two vectors of values and return a NumericallyIntegrable di
 function fft_convolve(y1::AbstractVector, y2::AbstractVector; Δ, t0_1, t0_2, pow2 = true)
     t, h = _fft_convolve(y1, y2; Δ, t0_1, t0_2, pow2)
     itr = interpolate((t,), h, Gridded(Linear()))
-    return NumericallyIntegrable(itr, extrema(t), length(t))
+    return NumericallyIntegrable(itr, extrema(t); n_sampling_bins = length(t))
 end
 
 """

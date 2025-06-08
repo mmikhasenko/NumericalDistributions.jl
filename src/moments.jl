@@ -1,5 +1,4 @@
-function numerical_moment(
-    model::NumericallyIntegrable, n::Int, μ = mean(model))
+function numerical_moment(model::NumericallyIntegrable, n::Int, μ = mean(model))
     return quadgk(x -> (x - μ)^n * pdf(model, x), model.support...)[1]
 end
 

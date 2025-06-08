@@ -29,10 +29,13 @@ import Distributions: pdf, cdf, minimum, maximum
 
 include("types.jl")
 include("moments.jl")
-include("sampling.jl")
 
 export Interpolated, InterpolatedLinear, InterpolatedConstant
 include("interpolated.jl")
+
+export invcdf
+export BinnedDensity
+include("sampling.jl")
 
 export fft_convolve
 include("convolution.jl")
