@@ -16,7 +16,7 @@ function Interpolated(f, binedges::AbstractVector; degree = Linear())
     NumericallyIntegrable(
         interpolate((binedges,), yv_unnorm, Gridded(degree)),
         extrema(binedges),
-        length(binedges),
+        n_sampling_bins = length(binedges),
     )
 end
 
@@ -25,14 +25,22 @@ end
 
 Type alias for a NumericallyIntegrable distribution that uses linear interpolation.
 """
-const InterpolatedLinear = NumericallyIntegrable{Interpolations.GriddedInterpolation{T, N, TC, Gridded{ST}, K}, IT, IntT} where {T, N, TC, ST <: Interpolations.Linear, K, IT <: Real, IntT <: Real}
+const InterpolatedLinear = NumericallyIntegrable{
+    Interpolations.GriddedInterpolation{T,N,TC,Gridded{ST},K},
+    IT,
+    IntT,
+} where {T,N,TC,ST<:Interpolations.Linear,K,IT<:Real,IntT<:Real}
 
 """
     InterpolatedConstant
 
 Type alias for a NumericallyIntegrable distribution that uses constant interpolation.
 """
-const InterpolatedConstant = NumericallyIntegrable{Interpolations.GriddedInterpolation{T, N, TC, Gridded{ST}, K}, IT, IntT} where {T, N, TC, ST <: Interpolations.Constant, K, IT <: Real, IntT <: Real}
+const InterpolatedConstant = NumericallyIntegrable{
+    Interpolations.GriddedInterpolation{T,N,TC,Gridded{ST},K},
+    IT,
+    IntT,
+} where {T,N,TC,ST<:Interpolations.Constant,K,IT<:Real,IntT<:Real}
 
 
 """
@@ -56,7 +64,7 @@ function Distributions.cdf(d::InterpolatedConstant, x::Real)
     # Construct bin edges - these are not equally spaced
     edges = Vector{eltype(grid)}(undef, n + 1)
     edges[1] = grid[1]
-    for i in 2:n
+    for i = 2:n
         edges[i] = 0.5 * (grid[i] + grid[i-1])
     end
     edges[n+1] = grid[n]
@@ -67,7 +75,7 @@ function Distributions.cdf(d::InterpolatedConstant, x::Real)
 
     idx = searchsortedlast(edges, x)
     s = zero(x)
-    for i in 1:idx-1
+    for i = 1:idx-1
         s += (edges[i+1] - edges[i]) * values[i]
     end
     s += (x - edges[idx]) * values[idx]
@@ -101,7 +109,7 @@ function Distributions.cdf(d::InterpolatedLinear, x::Real)
     s = zero(x)
 
     # Sum over full bins before x
-    for i in 1:idx-1
+    for i = 1:idx-1
         h = grid[i+1] - grid[i]
         v0, v1 = values[i], values[i+1]
         s += h * v0 + 0.5 * (v1 - v0) * h
