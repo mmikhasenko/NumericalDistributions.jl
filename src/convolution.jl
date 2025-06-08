@@ -35,9 +35,6 @@ function convolve_vectors(
     return NumericallyIntegrable(itr, extrema(t), length(t))
 end
 
-# Deprecated/redirect old name for backward compatibility
-const convolve_pdf = convolve_vectors
-
 """
     convolve_pdfs(d1::ContinuousUnivariateDistribution, d2::ContinuousUnivariateDistribution; pow2=true, degree=Linear(), gridsize=1000)
 

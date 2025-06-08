@@ -161,7 +161,8 @@ end
         (uni_support[2] - uni_support[1])
 
     # Vector API
-    conv_interp = convolve_pdf(yv_pdf1, yv_pdf2; Δ = Δ, t0_1 = first(x1), t0_2 = first(x2))
+    conv_interp =
+        convolve_vectors(yv_pdf1, yv_pdf2; Δ = Δ, t0_1 = first(x1), t0_2 = first(x2))
 
     # Test normalization - integral of the any pdf should be 1
     @test cdf(conv_interp, conv_interp.support[2]) ≈ 1.0
@@ -174,7 +175,6 @@ end
     for x in range(-1, 4, length = 5)
         v = pdf(conv_interp, x)
         u = conv_analytical(x)
-        @show v, u
         @test isapprox(v, u; atol = 4e-4)
     end
 end
