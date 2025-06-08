@@ -63,6 +63,3 @@ This document provides a general guideline and checklist for adding a new featur
 - [ ] Ensure all tests pass.
 - [ ] (Optional) Solicit feedback or code review.
 
----
-
-For a detailed example of a feature plan, see [`Convolution.Plan.md`](Convolution.Plan.md).
