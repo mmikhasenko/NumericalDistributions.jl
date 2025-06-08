@@ -116,3 +116,5 @@ The `Interpolated` constructor leverages the `Interpolations.jl` package to crea
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the general feature implementation strategy and checklist. For a detailed example, see [`Convolution.Plan.md`](Convolution.Plan.md).
