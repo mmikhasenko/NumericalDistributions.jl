@@ -113,7 +113,7 @@ end
 
 function Base.rand(rng::AbstractRNG, d::NumericallyIntegrable, n::Int64)
     if all(isfinite.(d.support))
-        bD = Interpolated(
+        bD = interpolated(
             x -> d.unnormalized_pdf(x),
             range(d.support..., d.n_sampling_bins);
             degree = Constant(),
@@ -123,7 +123,7 @@ function Base.rand(rng::AbstractRNG, d::NumericallyIntegrable, n::Int64)
         # For infinite support, use tangent transformation
         x(z) = tan(z * π / 2)
         z(x) = atan(x) * 2 / π
-        bD = Interpolated(
+        bD = interpolated(
             z -> d.unnormalized_pdf(x(z)) / cos(z * π / 2)^2,
             range(-1, 1, d.n_sampling_bins);
             degree = Constant(),

@@ -9,7 +9,7 @@ begin
     using Pkg
     Pkg.activate(joinpath(@__DIR__, ".."))
     Pkg.instantiate()
-    # 
+    #
     using NumericalDistributions
     # using NumericalDistributions.Distributions
     using Plots
@@ -37,10 +37,10 @@ Create interpolated distributions
 """
 
 # ╔═╡ f0a61d86-bf7b-4c89-9aa7-40a93828ffc3
-A = Interpolated(f1, x1);
+A = interpolated(f1, x1);
 
 # ╔═╡ df16ccf0-cf23-4c45-bd39-7318e17bd483
-B = Interpolated(f2, x2);
+B = interpolated(f2, x2);
 
 # ╔═╡ 87ba4a95-c6f2-4fd3-b34f-d134a996d687
 C = fft_convolve(A, B);

@@ -31,7 +31,8 @@ export pdf, cdf, quantile
 include("types.jl")
 include("moments.jl")
 
-export Interpolated, InterpolatedLinear, InterpolatedConstant
+export interpolated # method
+export InterpolatedLinear, InterpolatedConstant # type aliases
 include("interpolated.jl")
 
 export invcdf

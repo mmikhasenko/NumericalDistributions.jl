@@ -4,7 +4,7 @@ using Test
 using QuadGK
 using ForwardDiff
 
-a = Interpolated(x -> 4 - x^2, -2:1.0:1; degree = Constant())
+a = interpolated(x -> 4 - x^2, -2:1.0:1; degree = Constant())
 # plot(x -> pdf(a, x), -2, 2, fill = 0, fillalpha = 0.3, label = "PDF")
 # plot(x -> cdf(a, x), -2, 2, fill = 0, fillalpha = 0.3, label = "CDF")
 @testset "Interpolated constant" begin
@@ -22,7 +22,7 @@ a = Interpolated(x -> 4 - x^2, -2:1.0:1; degree = Constant())
     @test a.integral ≈ 8.5
 end
 
-b = Interpolated(x -> x^2, -2:0.5:1; degree = Linear())
+b = interpolated(x -> x^2, -2:0.5:1; degree = Linear())
 # plot(x -> pdf(b, x), -2, 2, fill = 0, fillalpha = 0.3, label = "PDF")
 # plot(y -> cdf(b, y), 0.9, 1.0, fillalpha = 0.3, label = "CDF")
 # plot!(y -> quadgk(x -> pdf(b, x), -2, y)[1], 0.9, 1.0, label = "Integral", color = :red)

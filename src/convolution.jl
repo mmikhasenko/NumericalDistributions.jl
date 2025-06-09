@@ -30,7 +30,7 @@ end
 """
     fft_convolve(d1::ContinuousUnivariateDistribution, d2::ContinuousUnivariateDistribution; pow2=true, degree=Linear(), gridsize=1000)
 
-Numerically convolve two probability density functions (PDFs) using FFTW. Accepts any objects that are subtypes of `ContinuousUnivariateDistribution` (e.g., `NumericallyIntegrable`, `Interpolated`, or standard continuous distributions).
+Numerically convolve two probability density functions (PDFs) using FFTW. Accepts any objects that are subtypes of `ContinuousUnivariateDistribution` (e.g., `NumericallyIntegrable`, `interpolated`, or standard continuous distributions).
 """
 function fft_convolve(
     d1::ContinuousUnivariateDistribution,

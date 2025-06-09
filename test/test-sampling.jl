@@ -10,7 +10,7 @@ using Test
     g(x) = 1.0
     lims = (0.0, 1.0)
     nBins = 100
-    bd = Interpolated(g, range(lims..., nBins + 1); degree = Constant())
+    bd = interpolated(g, range(lims..., nBins + 1); degree = Constant())
 
     # Test sampling
     rng = MersenneTwister(123)  # for reproducibility
@@ -23,7 +23,7 @@ using Test
 
     # Test non-uniform distribution (triangular)
     g_tri(x) = x
-    bd_tri = Interpolated(g_tri, range(0.0, 1.0, nBins + 1); degree = Constant())
+    bd_tri = interpolated(g_tri, range(0.0, 1.0, nBins + 1); degree = Constant())
     samples_tri = rand(rng, bd_tri, 10000)
 
     # Statistical tests for triangular distribution

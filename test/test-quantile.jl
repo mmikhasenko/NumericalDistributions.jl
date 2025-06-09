@@ -5,9 +5,9 @@ using Test
 f(x) = (1.2 - x^2) * exp(-x / 2)
 grid = range(-0.5, 1, length = 11)
 # Example: uniform distribution on [0, 1]
-d_const = Interpolated(f, grid; degree = Constant())
+d_const = interpolated(f, grid; degree = Constant())
 
-@testset "invcdf for InterpolatedConstant" begin
+@testset "Inverse CDF for InterpolatedConstant" begin
     # Test quantile(cdf(x)) ≈ x
     xs = range(0, 1, length = 61)[2:end-1]  # Avoid endpoints for constant interpolation
     for x in xs
@@ -21,9 +21,9 @@ d_const = Interpolated(f, grid; degree = Constant())
 end
 
 
-d_linear = Interpolated(f, grid; degree = Linear())
+d_linear = interpolated(f, grid; degree = Linear())
 
-@testset "invcdf for InterpolatedLinear" begin
+@testset "Inverse CDF for InterpolatedLinear" begin
     # Example: triangular distribution on [0, 1]
     xs = range(0, 1, length = 61)[2:end-1]  # Avoid endpoints for linear interpolation
     for x in xs

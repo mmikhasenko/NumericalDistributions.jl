@@ -1,22 +1,22 @@
 """
-    Interpolated(f, binedges; degree = Linear())
+    interpolated(f, grid; degree = Linear())
 
 Create a distribution using interpolation of a function over a grid of points.
 
 # Arguments
 - `f`: The function to be interpolated
-- `binedges::AbstractVector`: Grid points for interpolation
+- `grid::AbstractVector`: Grid points for interpolation
 - `degree`: Interpolation type, either `Linear()` or `Constant()`
 
 # Returns
 - `NumericallyIntegrable`: A distribution based on the interpolated function
 """
-function Interpolated(f, binedges::AbstractVector; degree = Linear())
-    yv_unnorm = f.(binedges)
+function interpolated(f, grid::AbstractVector; degree = Linear())
+    yv_unnorm = f.(grid)
     NumericallyIntegrable(
-        interpolate((binedges,), yv_unnorm, Gridded(degree)),
-        extrema(binedges),
-        n_sampling_bins = length(binedges),
+        interpolate((grid,), yv_unnorm, Gridded(degree)),
+        extrema(grid),
+        n_sampling_bins = length(grid),
     )
 end
 

@@ -61,7 +61,7 @@ uses half bin for the first and last bin, the others with a bin center
 """
 
 # ╔═╡ 55d99ee7-aceb-4139-b7e2-9907c421a8f5
-id = Interpolated(
+id = interpolated(
     f,
     range(x_range..., n_sampling_bins + 1);
     degree = NumericalDistributions.Interpolations.Constant(),
@@ -85,7 +85,7 @@ look very reasonable
 """
 
 # ╔═╡ 6772ec63-6370-4815-a79e-c914c6f39058
-il = Interpolated(
+il = interpolated(
     f,
     range(x_range..., n_sampling_bins + 1);
     degree = NumericalDistributions.Interpolations.Linear(),

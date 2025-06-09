@@ -49,18 +49,18 @@ cdf(dist, 1.0)  # returns the cumulative probability at x=1.0
 
 ### Interpolated Distributions
 
-The package provides an `Interpolated` constructor for creating distributions based on interpolated functions:
+The package provides an `interpolated` constructor for creating distributions based on interpolated functions:
 
 ```julia
 using NumericalDistributions
 
 # Create an interpolated distribution with constant degree
-a = Interpolated(x -> abs(x), -2:0.5:1; degree = Constant())
+a = interpolated(x -> abs(x), -2:0.5:1; degree = Constant())
 pdf(a, 0.4)  # Evaluates PDF at x=0.4
 cdf(a, 0.0)  # Computes CDF at x=0.0
 
 # Create an interpolated distribution with linear degree
-b = Interpolated(x -> abs(x), -2:0.5:1; degree = Linear())
+b = interpolated(x -> abs(x), -2:0.5:1; degree = Linear())
 pdf(b, 0.4)  # Evaluates PDF with linear interpolation
 cdf(b, 0.0)  # Computes CDF with linear interpolation
 ```
@@ -85,8 +85,8 @@ f1(x) = exp(-x^4)                    # Even, super-Gaussian
 f2(x) = 1 / ((x - 3)^2 + 1)          # Cauchy-like, centered at 3
 
 # Create interpolated distributions
-A = Interpolated(f1, x1)
-B = Interpolated(f2, x2)
+A = interpolated(f1, x1)
+B = interpolated(f2, x2)
 
 # Convolve the two distributions
 C = fft_convolve(A, B)
