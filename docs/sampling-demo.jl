@@ -30,7 +30,7 @@ theme(:boxed)
 f(x) = (1 - x^2) * exp(-(x-0.1)^2 / 0.2)
 
 # ╔═╡ 5ef71ef7-91e4-4292-bfb0-53780fd9f37a
-x_range = (-0.5, 0.9)
+x_range = (-0.5, 0.8)
 
 # ╔═╡ 9dec7c61-df4e-4043-a1d4-9181b64e9174
 const n_sampling_bins = 3
@@ -105,6 +105,9 @@ begin
 	plot!(x->invcdf(il, x), range(0, 1, 100))
 end
 
+# ╔═╡ 011cea46-070c-417e-b664-a335adf4f1ff
+
+
 # ╔═╡ Cell order:
 # ╟─3b8f966b-4acc-4064-bed4-3b90d7281366
 # ╠═6ae57d44-447b-11f0-374a-0f43aadcc968
@@ -122,3 +125,4 @@ end
 # ╠═6aa1af8d-3436-4209-b0b1-ed02141919fc
 # ╠═2a935941-9ed8-469e-9edf-bec9506e9a9b
 # ╠═6772ec63-6370-4815-a79e-c914c6f39058
+# ╠═011cea46-070c-417e-b664-a335adf4f1ff
