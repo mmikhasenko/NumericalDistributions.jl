@@ -4,7 +4,7 @@
 Efficiently invert the CDF for an InterpolatedConstant distribution.
 Finds the bin for u and computes the analytic location within the bin, accounting for the value change in the middle of the bin.
 """
-quantile(d::InterpolatedConstant, u::Real) = fast_invcdf_constant(d, [u])[1]
+quantile(d::InterpolatedConstant, u::Real) = quantile(d, [u])[1]
 
 """
     quantile(d::InterpolatedLinear, u::Real)
@@ -12,8 +12,75 @@ quantile(d::InterpolatedConstant, u::Real) = fast_invcdf_constant(d, [u])[1]
 Efficiently invert the CDF for an InterpolatedLinear distribution.
 Finds the bin for u and computes the analytic location within the bin using the linear CDF formula.
 """
-quantile(d::InterpolatedLinear, u::Real) = fast_invcdf_linear(d, [u])[1]
+quantile(d::InterpolatedLinear, u::Real) = quantile(d, [u])[1]
 
+
+
+# Fast sampling for InterpolatedConstant using shared invcdf
+function Base.rand(rng::AbstractRNG, d::InterpolatedConstant, n::Int64)
+    u = rand(rng, n)
+    return quantile(d, u)
+end
+
+# Fast sampling for InterpolatedLinear using shared invcdf
+function Base.rand(rng::AbstractRNG, d::InterpolatedLinear, n::Int64)
+    u = rand(rng, n)
+    return quantile(d, u)
+end
+
+
+function Base.rand(rng::AbstractRNG, d::NumericallyIntegrable, n::Int64)
+    if all(isfinite.(d.support))
+        bD = interpolated(
+            x -> d.unnormalized_pdf(x),
+            range(d.support..., d.n_sampling_bins);
+            degree = Constant(),
+        )
+        return rand(rng, bD, n)
+    else
+        # For infinite support, use tangent transformation
+        x(z) = tan(z * π / 2)
+        z(x) = atan(x) * 2 / π
+        bD = interpolated(
+            z -> d.unnormalized_pdf(x(z)) / cos(z * π / 2)^2,
+            range(-1, 1, d.n_sampling_bins);
+            degree = Constant(),
+        )
+        _sample = rand(rng, bD, n)
+        return x.(_sample)
+    end
+end
+
+
+# Internal methods
+# precompute and broadcasted
+
+function quantile(d::InterpolatedConstant, u::AbstractVector)
+    grid = d.unnormalized_pdf.knots[1]
+    n_grid = length(grid)
+    # Construct half-bin edges
+    edges = Vector{eltype(grid)}(undef, n_grid + 1)
+    edges[1] = grid[1]
+    for i = 2:n_grid
+        edges[i] = 0.5 * (grid[i] + grid[i-1])
+    end
+    edges[n_grid+1] = grid[end]
+    values = d.unnormalized_pdf.coefs
+    bin_widths = diff(edges)
+    # Calculate weights
+    unnormalized_weights = values .* bin_widths
+    weights = unnormalized_weights ./ d.integral
+    cdf_grid = cumsum(vcat(0.0, weights))
+    return _invcdf_constant_scalar.(u, Ref(edges), Ref(weights), Ref(cdf_grid))
+end
+
+function quantile(d::InterpolatedLinear, u::AbstractVector)
+    itr = d.unnormalized_pdf
+    grid = itr.knots[1]
+    pdf_grid = itr.coefs ./ d.integral
+    cdf_grid = cdf.(Ref(d), grid)
+    return _invcdf_linear_scalar.(u, Ref(grid), Ref(pdf_grid), Ref(cdf_grid))
+end
 
 function _invcdf_constant_scalar(u, grid, weights, cdf_grid)
     # Handle edge cases
@@ -34,25 +101,6 @@ function _invcdf_constant_scalar(u, grid, weights, cdf_grid)
     # Compute position within bin
     x = x0 + (u - cdf_grid[bin_ind]) / w * (x1 - x0)
     return x
-end
-
-function fast_invcdf_constant(d::InterpolatedConstant, u::AbstractVector)
-    grid = d.unnormalized_pdf.knots[1]
-    n_grid = length(grid)
-    # Construct half-bin edges
-    edges = Vector{eltype(grid)}(undef, n_grid + 1)
-    edges[1] = grid[1]
-    for i = 2:n_grid
-        edges[i] = 0.5 * (grid[i] + grid[i-1])
-    end
-    edges[n_grid+1] = grid[end]
-    values = d.unnormalized_pdf.coefs
-    bin_widths = diff(edges)
-    # Calculate weights
-    unnormalized_weights = values .* bin_widths
-    weights = unnormalized_weights ./ d.integral
-    cdf_grid = cumsum(vcat(0.0, weights))
-    return _invcdf_constant_scalar.(u, Ref(edges), Ref(weights), Ref(cdf_grid))
 end
 
 function _invcdf_linear_scalar(u, grid, pdf_grid, cdf_grid)
@@ -87,48 +135,5 @@ function _invcdf_linear_scalar(u, grid, pdf_grid, cdf_grid)
         s = abs(s1 - bin_center) <= abs(s2 - bin_center) ? s1 : s2
 
         return x0 + s
-    end
-end
-
-function fast_invcdf_linear(d::InterpolatedLinear, u::AbstractVector)
-    itr = d.unnormalized_pdf
-    grid = itr.knots[1]
-    pdf_grid = itr.coefs ./ d.integral
-    cdf_grid = cdf.(Ref(d), grid)
-    return _invcdf_linear_scalar.(u, Ref(grid), Ref(pdf_grid), Ref(cdf_grid))
-end
-
-# Fast sampling for InterpolatedConstant using shared invcdf
-function Base.rand(rng::AbstractRNG, d::InterpolatedConstant, n::Int64)
-    u = rand(rng, n)
-    return fast_invcdf_constant(d, u)
-end
-
-# Fast sampling for InterpolatedLinear using shared invcdf
-function Base.rand(rng::AbstractRNG, d::InterpolatedLinear, n::Int64)
-    u = rand(rng, n)
-    return fast_invcdf_linear(d, u)
-end
-
-
-function Base.rand(rng::AbstractRNG, d::NumericallyIntegrable, n::Int64)
-    if all(isfinite.(d.support))
-        bD = interpolated(
-            x -> d.unnormalized_pdf(x),
-            range(d.support..., d.n_sampling_bins);
-            degree = Constant(),
-        )
-        return rand(rng, bD, n)
-    else
-        # For infinite support, use tangent transformation
-        x(z) = tan(z * π / 2)
-        z(x) = atan(x) * 2 / π
-        bD = interpolated(
-            z -> d.unnormalized_pdf(x(z)) / cos(z * π / 2)^2,
-            range(-1, 1, d.n_sampling_bins);
-            degree = Constant(),
-        )
-        _sample = rand(rng, bD, n)
-        return x.(_sample)
     end
 end
