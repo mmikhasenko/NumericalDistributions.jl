@@ -15,7 +15,7 @@ Finds the bin for u and computes the analytic location within the bin using the 
 invcdf(d::InterpolatedLinear, u::Real) = fast_invcdf_linear(d, [u])[1]
 
 
-function _invcdf_constant_scalar(u, edges, values, weights, cumarr)
+function _invcdf_constant_scalar(u, edges, weights, cumarr)
     # Handle edge cases
     if u <= 0.0
         return edges[1]
@@ -57,7 +57,7 @@ function fast_invcdf_constant(d::InterpolatedConstant, u::AbstractVector)
     unnorm_weights = values .* bin_widths
     weights = unnorm_weights / d.integral
     cumarr = cumsum(vcat(0.0, weights))
-    return _invcdf_constant_scalar.(u, Ref(edges), Ref(values), Ref(weights), Ref(cumarr))
+    return _invcdf_constant_scalar.(u, Ref(edges), Ref(weights), Ref(cumarr))
 end
 
 # --- Shared fast invcdf for InterpolatedLinear ---
