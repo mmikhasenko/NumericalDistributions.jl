@@ -1,3 +1,8 @@
+using NumericalDistributions
+using Distributions
+using QuadGK
+using Test
+
 @testset "Basic functionality" begin
     # Test with a simple normal distribution truncated to [-2, 2]
     f(x) = exp(-x^2 / 2) * (abs(x) < 2)

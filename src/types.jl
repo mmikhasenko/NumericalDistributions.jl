@@ -42,8 +42,8 @@ end
 function Distributions.cdf(d::NumericallyIntegrable, x::Real)
     x ≤ d.support[1] && return zero(x)
     x ≥ d.support[2] && return one(x)
-    integral, _ = quadgk(x -> d.unnormalized_pdf(x), d.support[1], x)
-    return integral / d.integral
+    _integral = integral(x -> d.unnormalized_pdf(x), d.support[1], x)
+    return _integral / d.integral
 end
 
 # Required method implementations for Distributions.jl interface
