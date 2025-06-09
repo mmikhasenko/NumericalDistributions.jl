@@ -40,4 +40,3 @@ itr_linear = interpolate((1.0:3.0,), [1.0, 3.0, 2.0], Gridded(Linear()))
     # integral over a small range
     @test integral(itr_linear, 2.1, 2.2) ≈ quadgk(itr_linear, 2.1, 2.2)[1]
 end
-

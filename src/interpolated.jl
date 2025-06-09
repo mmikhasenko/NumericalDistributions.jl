@@ -84,4 +84,3 @@ function Distributions.cdf(d::InterpolatedLinear, x::Real)
 
     return integral(itr, grid[1], x) / d.integral
 end
-

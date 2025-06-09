@@ -9,8 +9,8 @@ d3 = interpolated(f, range(-0.5, 0.9, n_sampling_bins + 1); degree = Linear())
 
 using BenchmarkTools
 
-@btime rand($d1, 1000); # about 306.458 μs
-@btime rand($d2, 1000); # about 2.029 s
+@btime rand($d1, 1000); # 34.542 μs
+@btime rand($d2, 1000); # 28.500 μs
 
 # clear why slower
-@btime rand($d3, 1000); # about 690.124 ms
+@btime rand($d3, 1000); # 754.542 μs
