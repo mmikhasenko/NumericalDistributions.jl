@@ -21,7 +21,6 @@ using Random
 using QuadGK
 
 export NumericallyIntegrable
-export BinnedDensity
 
 import Distributions.Statistics: mean, var
 import Distributions.StatsBase: kurtosis, skewness
@@ -35,9 +34,6 @@ include("interpolated.jl")
 
 export invcdf
 include("sampling.jl")
-
-export BinnedDensity
-include("binned-density.jl")
 
 export fft_convolve
 include("convolution.jl")
