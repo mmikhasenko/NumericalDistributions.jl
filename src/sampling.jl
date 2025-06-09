@@ -55,7 +55,7 @@ function fast_invcdf_constant(d::InterpolatedConstant, u::AbstractVector)
     return _invcdf_constant_scalar.(u, Ref(edges), Ref(weights), Ref(cumarr))
 end
 
-function _invcdf_linear_scalar(u, grid, values, cdf_grid, integral)
+function _invcdf_linear_scalar(u, grid, pdf_grid, cdf_grid)
     # Handle edge cases
     u <= zero(u) && return grid[1]
     u >= one(u) && return grid[end]
@@ -68,11 +68,11 @@ function _invcdf_linear_scalar(u, grid, values, cdf_grid, integral)
         return grid[end]
     else
         x0, x1 = grid[idx-1], grid[idx]
-        v0, v1 = values[idx-1], values[idx]
+        v0, v1 = pdf_grid[idx-1], pdf_grid[idx]
         h = x1 - x0
         c0 = cdf_grid[idx-1]
-        a = (v1 - v0) / h / integral
-        b = v0 / integral
+        a = (v1 - v0) / h
+        b = v0
         c = c0 - u
 
         # Solve quadratic equation for position within bin
@@ -93,10 +93,9 @@ end
 function fast_invcdf_linear(d::InterpolatedLinear, u::AbstractVector)
     itr = d.unnormalized_pdf
     grid = itr.knots[1]
-    values = itr.coefs
+    pdf_grid = itr.coefs ./ d.integral
     cdf_grid = cdf.(Ref(d), grid)
-    integral = d.integral
-    return _invcdf_linear_scalar.(u, Ref(grid), Ref(values), Ref(cdf_grid), Ref(integral))
+    return _invcdf_linear_scalar.(u, Ref(grid), Ref(pdf_grid), Ref(cdf_grid))
 end
 
 # Fast sampling for InterpolatedConstant using shared invcdf
