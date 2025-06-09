@@ -12,6 +12,6 @@ include("test-sampling.jl")
 include("test-moments.jl")
 
 include("test-interpolated.jl")
-include("test-invcdf.jl")
+include("test-quantile.jl")
 
 include("test-convolution.jl")
