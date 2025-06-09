@@ -15,42 +15,29 @@ Finds the bin for u and computes the analytic location within the bin using the 
 invcdf(d::InterpolatedLinear, u::Real) = fast_invcdf_linear(d, [u])[1]
 
 
-function _invcdf_constant_scalar(uu, edges, values, weights, cumarr)
-    uu = clamp(uu, 0.0, 1.0) # Ensure uu is strictly within [0,1]
-
-    if uu == 0.0
+function _invcdf_constant_scalar(u, edges, values, weights, cumarr)
+    # Handle edge cases
+    if u <= 0.0
         return edges[1]
     end
-    if uu == 1.0
+    if u >= 1.0
         return edges[end]
     end
 
-    # For 0 < uu < 1
-    # searchsortedlast returns the index k such that cumarr[k] <= uu < cumarr[k+1]
-    # or 0 if uu < cumarr[1] (but cumarr[1] is 0, handled by uu == 0.0 check)
-    binind = searchsortedlast(cumarr, uu)
+    # For 0 < u < 1
+    # searchsortedlast returns the index k such that cumarr[k] <= u < cumarr[k+1]
+    binind = searchsortedlast(cumarr, u)
 
-    # Ensure binind is a valid index for edges and weights
-    # cumarr has length ngrid+1, weights has length ngrid, edges has length ngrid+1
-    # binind from searchsortedlast will be in 1:ngrid if 0 < uu < 1
-    if binind < 1
-        binind = 1 # Should not happen if uu > 0 and cumarr[1]=0
-    elseif binind > length(weights) # length(weights) is ngrid
-        binind = length(weights) # Clamp to last valid bin index for weights
-    end
+    # Safety check for bin index
+    binind = max(1, min(binind, length(weights)))
 
-    σl, σr = edges[binind], edges[binind+1]
+    # Get bin boundaries and weight
+    x0, x1 = edges[binind], edges[binind+1]
     w = weights[binind]
 
-    if abs(w) < eps(typeof(w)) # Check if weight is effectively zero
-        # CDF is flat in this region, return left edge by convention
-        return σl
-    end
-
-    x = σl + (uu - cumarr[binind]) / w * (σr - σl)
-
-    # Clamp result to the bin to handle potential floating point inaccuracies
-    return clamp(x, σl, σr)
+    # Compute position within bin
+    x = x0 + (u - cumarr[binind]) / w * (x1 - x0)
+    return x
 end
 
 function fast_invcdf_constant(d::InterpolatedConstant, u::AbstractVector)
@@ -64,9 +51,9 @@ function fast_invcdf_constant(d::InterpolatedConstant, u::AbstractVector)
     end
     edges[ngrid+1] = grid[end]
     values = d.unnormalized_pdf.coefs
-    # Bin widths: first and last are half-widths if grid is uniform
+    # Bin widths
     bin_widths = diff(edges)
-    # Use value at left edge for each bin (matches CDF logic)
+    # Calculate weights
     unnorm_weights = values .* bin_widths
     weights = unnorm_weights / d.integral
     cumarr = cumsum(vcat(0.0, weights))
@@ -74,14 +61,17 @@ function fast_invcdf_constant(d::InterpolatedConstant, u::AbstractVector)
 end
 
 # --- Shared fast invcdf for InterpolatedLinear ---
-function _invcdf_linear_scalar(uu, grid, values, cdf_grid, integral)
-    uu = clamp(uu, 0, 1)
-    if uu == 0
+function _invcdf_linear_scalar(u, grid, values, cdf_grid, integral)
+    # Handle edge cases
+    if u <= 0.0
         return grid[1]
-    elseif uu == 1
+    end
+    if u >= 1.0
         return grid[end]
     end
-    idx = searchsortedfirst(cdf_grid, uu)
+
+    # For 0 < u < 1
+    idx = searchsortedfirst(cdf_grid, u)
     if idx == 1
         return grid[1]
     elseif idx > length(grid)
@@ -93,31 +83,19 @@ function _invcdf_linear_scalar(uu, grid, values, cdf_grid, integral)
         c0 = cdf_grid[idx-1]
         a = (v1 - v0) / h / integral
         b = v0 / integral
-        c = c0 - uu
-        if abs(a) < 1e-14
-            s = -c / b
-        else
-            disc = b^2 - 2 * a * c
+        c = c0 - u
 
-            # Discriminant should be non-negative by the mathematical properties of CDFs
-            # If it's negative, it's likely due to numerical issues - use max to avoid this
-            disc = max(disc, 0.0)
+        # Solve quadratic equation for position within bin
+        disc = b^2 - 2 * a * c
+        disc = max(disc, 0.0)  # Ensure non-negative discriminant
 
-            s1 = (-b + sqrt(disc)) / a
-            s2 = (-b - sqrt(disc)) / a
+        s1 = (-b + sqrt(disc)) / a
+        s2 = (-b - sqrt(disc)) / a
 
-            # Calculate distance from center of bin for both solutions
-            bin_center = h / 2
-            dist1 = abs(s1 - bin_center)
-            dist2 = abs(s2 - bin_center)
+        # Choose the solution closest to the center of the bin
+        bin_center = h / 2
+        s = abs(s1 - bin_center) <= abs(s2 - bin_center) ? s1 : s2
 
-            # Select the solution closest to the center of the bin
-            # and clamp to valid range if needed
-            s = dist1 <= dist2 ? s1 : s2
-
-            # Clamp to ensure we're in the valid range [0,h]
-            s = clamp(s, 0, h)
-        end
         return x0 + s
     end
 end
