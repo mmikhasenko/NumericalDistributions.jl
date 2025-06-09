@@ -10,7 +10,7 @@ begin
     using Pkg
     Pkg.activate(joinpath(@__DIR__, ".."))
     Pkg.instantiate()
-    # 
+    #
     using NumericalDistributions
     using Plots
 end
@@ -27,7 +27,7 @@ When interpolated linearly, or interpolated with a const.
 theme(:boxed)
 
 # ╔═╡ e5958f19-040b-4503-a8fb-2565b27d575e
-f(x) = (1 - x^2) * exp(-(x-0.1)^2 / 0.2)
+f(x) = (1 - x^2) * exp(-(x - 0.1)^2 / 0.2)
 
 # ╔═╡ 5ef71ef7-91e4-4292-bfb0-53780fd9f37a
 x_range = (-0.5, 0.8)
@@ -49,9 +49,9 @@ let
     data = rand(d, 1_000_000)
     bins = range(x_range..., 100)
     scale = length(data) * (bins[2] - bins[1])
-	# 
-    plot(x -> pdf(d, x) * scale, x_range..., lab="true")
-    stephist!(data; bins, lab="sampled")
+    #
+    plot(x -> pdf(d, x) * scale, x_range..., lab = "true")
+    stephist!(data; bins, lab = "sampled")
 end
 
 # ╔═╡ 5a60e4f6-fd8b-4d91-bdc2-de88b905cd39
@@ -72,10 +72,10 @@ let
     data = rand(id, 1_000_000)
     bins = range(x_range..., 100)
     scale = length(data) * (bins[2] - bins[1])
-	# 
-    plot(x -> pdf(d, x) * scale, x_range..., lab="true")
-	plot!(x -> pdf(id, x) * scale, x_range..., lab="constant-interp.")
-	stephist!(data; bins, lab="sampled")
+    #
+    plot(x -> pdf(d, x) * scale, x_range..., lab = "true")
+    plot!(x -> pdf(id, x) * scale, x_range..., lab = "constant-interp.")
+    stephist!(data; bins, lab = "sampled")
 end
 
 # ╔═╡ 0aef928f-90b5-4eb6-847f-891f7d900acd
@@ -93,16 +93,16 @@ il = Interpolated(
 
 # ╔═╡ 6aa1af8d-3436-4209-b0b1-ed02141919fc
 begin
-	plot(aspect_ratio=1)
-	plot!(x->cdf(id, x), range(x_range..., 100))
-	plot!(x->cdf(il, x), range(x_range..., 100))
+    plot(aspect_ratio = 1)
+    plot!(x -> cdf(id, x), range(x_range..., 100))
+    plot!(x -> cdf(il, x), range(x_range..., 100))
 end
 
 # ╔═╡ 2a935941-9ed8-469e-9edf-bec9506e9a9b
 begin
-	plot(aspect_ratio=1)
-	plot!(x->invcdf(id, x), range(0, 1, 100))
-	plot!(x->invcdf(il, x), range(0, 1, 100))
+    plot(aspect_ratio = 1)
+    plot!(x -> quantile(id, x), range(0, 1, 100))
+    plot!(x -> quantile(il, x), range(0, 1, 100))
 end
 
 # ╔═╡ 011cea46-070c-417e-b664-a335adf4f1ff

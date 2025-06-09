@@ -8,16 +8,16 @@ grid = range(-0.5, 1, length = 11)
 d_const = Interpolated(f, grid; degree = Constant())
 
 @testset "invcdf for InterpolatedConstant" begin
-    # Test invcdf(cdf(x)) ≈ x
+    # Test quantile(cdf(x)) ≈ x
     xs = range(0, 1, length = 61)[2:end-1]  # Avoid endpoints for constant interpolation
     for x in xs
         u = cdf(d_const, x)
-        x2 = invcdf(d_const, u)
+        x2 = quantile(d_const, u)
         @test isapprox(x, x2; atol = 1e-6)
     end
-    # Test invcdf(0) and invcdf(1)
-    @test isapprox(invcdf(d_const, 0), d_const.support[1]; atol = 1e-6)
-    @test isapprox(invcdf(d_const, 1), d_const.support[2]; atol = 1e-6)
+    # Test quantile(0) and quantile(1)
+    @test isapprox(quantile(d_const, 0), d_const.support[1]; atol = 1e-6)
+    @test isapprox(quantile(d_const, 1), d_const.support[2]; atol = 1e-6)
 end
 
 
@@ -28,9 +28,9 @@ d_linear = Interpolated(f, grid; degree = Linear())
     xs = range(0, 1, length = 61)[2:end-1]  # Avoid endpoints for linear interpolation
     for x in xs
         u = cdf(d_linear, x)
-        x2 = invcdf(d_linear, u)
+        x2 = quantile(d_linear, u)
         @test isapprox(x, x2; atol = 1e-6)
     end
-    @test isapprox(invcdf(d_linear, 0), d_linear.support[1]; atol = 1e-6)
-    @test isapprox(invcdf(d_linear, 1), d_linear.support[2]; atol = 1e-6)
+    @test isapprox(quantile(d_linear, 0), d_linear.support[1]; atol = 1e-6)
+    @test isapprox(quantile(d_linear, 1), d_linear.support[2]; atol = 1e-6)
 end

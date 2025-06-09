@@ -1,18 +1,18 @@
 """
-    invcdf(d::InterpolatedConstant, u::Real)
+    quantile(d::InterpolatedConstant, u::Real)
 
 Efficiently invert the CDF for an InterpolatedConstant distribution.
 Finds the bin for u and computes the analytic location within the bin, accounting for the value change in the middle of the bin.
 """
-invcdf(d::InterpolatedConstant, u::Real) = fast_invcdf_constant(d, [u])[1]
+quantile(d::InterpolatedConstant, u::Real) = fast_invcdf_constant(d, [u])[1]
 
 """
-    invcdf(d::InterpolatedLinear, u::Real)
+    quantile(d::InterpolatedLinear, u::Real)
 
 Efficiently invert the CDF for an InterpolatedLinear distribution.
 Finds the bin for u and computes the analytic location within the bin using the linear CDF formula.
 """
-invcdf(d::InterpolatedLinear, u::Real) = fast_invcdf_linear(d, [u])[1]
+quantile(d::InterpolatedLinear, u::Real) = fast_invcdf_linear(d, [u])[1]
 
 
 function _invcdf_constant_scalar(u, grid, weights, cdf_grid)

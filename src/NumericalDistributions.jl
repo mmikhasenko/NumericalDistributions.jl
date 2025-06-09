@@ -24,7 +24,9 @@ export NumericallyIntegrable
 
 import Distributions.Statistics: mean, var
 import Distributions.StatsBase: kurtosis, skewness
-import Distributions: pdf, cdf, minimum, maximum
+import Distributions: pdf, cdf, minimum, maximum, quantile
+
+export pdf, cdf, quantile
 
 include("types.jl")
 include("moments.jl")
@@ -38,6 +40,5 @@ include("sampling.jl")
 export fft_convolve
 include("convolution.jl")
 
-export pdf, cdf
 
 end # module
