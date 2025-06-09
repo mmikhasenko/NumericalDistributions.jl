@@ -1,22 +1,20 @@
+using NumericalDistributions.Interpolations
+using NumericalDistributions
+using Statistics
+using Random
+using QuadGK
+using Test
 
-@testset "BinnedDensity" begin
+@testset "Interpolated Sampling" begin
     # Test uniform distribution
     g(x) = 1.0
     lims = (0.0, 1.0)
     nBins = 100
-    bd = BinnedDensity(g, lims, nBins)
-
-    # Test structure
-    @test length(bd.grid) == nBins + 1  # nBins + 1 points to define nBins intervals
-    @test bd.grid[1] ≈ 0.0
-    @test bd.grid[end] ≈ 1.0
-    @test length(bd.cumarr) == nBins + 1  # includes 0 at start
-    @test bd.cumarr[1] ≈ 0.0
-    @test bd.cumarr[end] ≈ 1.0
+    bd = Interpolated(g, range(lims..., nBins + 1); degree = Constant())
 
     # Test sampling
     rng = MersenneTwister(123)  # for reproducibility
-    samples = [rand(rng, bd) for _ ∈ 1:10000]
+    samples = rand(rng, bd, 10000)
 
     # Statistical tests for uniform distribution
     @test all(0 .<= samples .<= 1)
@@ -25,8 +23,8 @@
 
     # Test non-uniform distribution (triangular)
     g_tri(x) = x
-    bd_tri = BinnedDensity(g_tri, (0.0, 1.0), nBins)
-    samples_tri = [rand(rng, bd_tri) for _ ∈ 1:10000]
+    bd_tri = Interpolated(g_tri, range(0.0, 1.0, nBins + 1); degree = Constant())
+    samples_tri = rand(rng, bd_tri, 10000)
 
     # Statistical tests for triangular distribution
     @test all(0 .<= samples_tri .<= 1)
@@ -34,7 +32,7 @@
     @test isapprox(median(samples_tri), 0.707, atol = 0.02)  # should be close to √(0.5)
 end
 
-@testset "Sampling" begin
+@testset "NumericallyIntegrable Sampling" begin
     # Test with uniform distribution on [0,1]
     f(x) = 1.0
     d = NumericallyIntegrable(f, (0, 1))

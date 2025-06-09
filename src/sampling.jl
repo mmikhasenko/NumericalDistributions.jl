@@ -99,15 +99,36 @@ function fast_invcdf_linear(d::InterpolatedLinear, u::AbstractVector)
 end
 
 # Fast sampling for InterpolatedConstant using shared invcdf
-function Base.rand(rng::AbstractRNG, d::InterpolatedConstant, n::Int64 = 1)
+function Base.rand(rng::AbstractRNG, d::InterpolatedConstant, n::Int64)
     u = rand(rng, n)
     return fast_invcdf_constant(d, u)
 end
 
 # Fast sampling for InterpolatedLinear using shared invcdf
-function Base.rand(rng::AbstractRNG, d::InterpolatedLinear, n::Int64 = 1)
+function Base.rand(rng::AbstractRNG, d::InterpolatedLinear, n::Int64)
     u = rand(rng, n)
     return fast_invcdf_linear(d, u)
 end
 
-Base.rand(d::NumericallyIntegrable, n::Int64 = 1) = rand(Random.GLOBAL_RNG, d, n)
+
+function Base.rand(rng::AbstractRNG, d::NumericallyIntegrable, n::Int64)
+    if all(isfinite.(d.support))
+        bD = Interpolated(
+            x -> d.unnormalized_pdf(x),
+            range(d.support..., d.n_sampling_bins);
+            degree = Constant(),
+        )
+        return rand(rng, bD, n)
+    else
+        # For infinite support, use tangent transformation
+        x(z) = tan(z * π / 2)
+        z(x) = atan(x) * 2 / π
+        bD = Interpolated(
+            z -> d.unnormalized_pdf(x(z)) / cos(z * π / 2)^2,
+            range(-1, 1, d.n_sampling_bins);
+            degree = Constant(),
+        )
+        _sample = rand(rng, bD, n)
+        return x.(_sample)
+    end
+end

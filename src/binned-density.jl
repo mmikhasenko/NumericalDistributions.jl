@@ -45,21 +45,3 @@ function Base.rand(rng::AbstractRNG, bD::BinnedDensity)
     return σ
 end
 
-
-function Base.rand(rng::AbstractRNG, d::NumericallyIntegrable, n::Int64 = 1)
-    if all(isfinite.(d.support))
-        bD = BinnedDensity(x -> d.unnormalized_pdf(x), d.support, d.n_sampling_bins)
-        return map(_ -> rand(rng, bD), 1:n)
-    else
-        # For infinite support, use tangent transformation
-        x(z) = tan(z * π / 2)
-        z(x) = atan(x) * 2 / π
-        bD = BinnedDensity(
-            z -> d.unnormalized_pdf(x(z)) / cos(z * π / 2)^2,
-            (-1, 1),
-            d.n_sampling_bins,
-        )
-        _sample = map(_ -> rand(rng, bD), 1:n)
-        return x.(_sample)
-    end
-end
