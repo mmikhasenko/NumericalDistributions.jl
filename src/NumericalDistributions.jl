@@ -34,8 +34,10 @@ export Interpolated, InterpolatedLinear, InterpolatedConstant
 include("interpolated.jl")
 
 export invcdf
-export BinnedDensity
 include("sampling.jl")
+
+export BinnedDensity
+include("binned-density.jl")
 
 export fft_convolve
 include("convolution.jl")
