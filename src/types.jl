@@ -26,13 +26,14 @@ struct NumericallyIntegrable{F,T<:Real,I} <: ContinuousUnivariateDistribution
     n_sampling_bins::Int
 
     function NumericallyIntegrable(f, support; n_sampling_bins = 300)
-        integral = quadgk(f, support...)[1]
+        _integral = integral(f, support[1], support[2])
         F = typeof(f)
         T = eltype(support)
-        I = typeof(integral)
-        new{F,T,I}(f, integral, support, n_sampling_bins)
+        I = typeof(_integral)
+        new{F,T,I}(f, _integral, support, n_sampling_bins)
     end
 end
+integral(f, a::Real, b::Real) = quadgk(f, a, b)[1]
 
 function Distributions.pdf(d::NumericallyIntegrable, x::Real)
     return d.support[1] <= x <= d.support[2] ? d.unnormalized_pdf(x) / d.integral : zero(x)

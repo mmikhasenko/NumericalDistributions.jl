@@ -1,8 +1,8 @@
 using NumericalDistributions
 using Interpolations
-using Test
-using QuadGK
 using ForwardDiff
+using QuadGK
+using Test
 
 a = interpolated(x -> 4 - x^2, -2:1.0:1; degree = Constant())
 # plot(x -> pdf(a, x), -2, 2, fill = 0, fillalpha = 0.3, label = "PDF")

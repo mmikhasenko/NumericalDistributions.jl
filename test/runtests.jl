@@ -15,3 +15,6 @@ include("test-interpolated.jl")
 include("test-quantile.jl")
 
 include("test-convolution.jl")
+
+include("test-interpolate-integral.jl")
+
