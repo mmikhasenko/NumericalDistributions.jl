@@ -15,44 +15,44 @@ Finds the bin for u and computes the analytic location within the bin using the 
 invcdf(d::InterpolatedLinear, u::Real) = fast_invcdf_linear(d, [u])[1]
 
 
-function _invcdf_constant_scalar(u, edges, weights, cumarr)
+function _invcdf_constant_scalar(u, grid, weights, cdf_grid)
     # Handle edge cases
-    u <= zero(u) && return edges[1]
-    u >= one(u) && return edges[end]
+    u <= zero(u) && return grid[1]
+    u >= one(u) && return grid[end]
 
     # For 0 < u < 1
-    # searchsortedlast returns the index k such that cumarr[k] <= u < cumarr[k+1]
-    binind = searchsortedlast(cumarr, u)
+    # searchsortedlast returns the index k such that cdf_grid[k] <= u < cdf_grid[k+1]
+    bin_ind = searchsortedlast(cdf_grid, u)
 
     # Safety check for bin index
-    binind = max(1, min(binind, length(weights)))
+    bin_ind = max(1, min(bin_ind, length(weights)))
 
     # Get bin boundaries and weight
-    x0, x1 = edges[binind], edges[binind+1]
-    w = weights[binind]
+    x0, x1 = grid[bin_ind], grid[bin_ind+1]
+    w = weights[bin_ind]
 
     # Compute position within bin
-    x = x0 + (u - cumarr[binind]) / w * (x1 - x0)
+    x = x0 + (u - cdf_grid[bin_ind]) / w * (x1 - x0)
     return x
 end
 
 function fast_invcdf_constant(d::InterpolatedConstant, u::AbstractVector)
     grid = d.unnormalized_pdf.knots[1]
-    ngrid = length(grid)
+    n_grid = length(grid)
     # Construct half-bin edges
-    edges = Vector{eltype(grid)}(undef, ngrid + 1)
+    edges = Vector{eltype(grid)}(undef, n_grid + 1)
     edges[1] = grid[1]
-    for i = 2:ngrid
+    for i = 2:n_grid
         edges[i] = 0.5 * (grid[i] + grid[i-1])
     end
-    edges[ngrid+1] = grid[end]
+    edges[n_grid+1] = grid[end]
     values = d.unnormalized_pdf.coefs
     bin_widths = diff(edges)
     # Calculate weights
-    unnorm_weights = values .* bin_widths
-    weights = unnorm_weights / d.integral
-    cumarr = cumsum(vcat(0.0, weights))
-    return _invcdf_constant_scalar.(u, Ref(edges), Ref(weights), Ref(cumarr))
+    unnormalized_weights = values .* bin_widths
+    weights = unnormalized_weights ./ d.integral
+    cdf_grid = cumsum(vcat(0.0, weights))
+    return _invcdf_constant_scalar.(u, Ref(edges), Ref(weights), Ref(cdf_grid))
 end
 
 function _invcdf_linear_scalar(u, grid, pdf_grid, cdf_grid)
