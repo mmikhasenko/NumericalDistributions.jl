@@ -17,12 +17,8 @@ invcdf(d::InterpolatedLinear, u::Real) = fast_invcdf_linear(d, [u])[1]
 
 function _invcdf_constant_scalar(u, edges, weights, cumarr)
     # Handle edge cases
-    if u <= 0.0
-        return edges[1]
-    end
-    if u >= 1.0
-        return edges[end]
-    end
+    u <= zero(u) && return edges[1]
+    u >= one(u) && return edges[end]
 
     # For 0 < u < 1
     # searchsortedlast returns the index k such that cumarr[k] <= u < cumarr[k+1]
@@ -51,7 +47,6 @@ function fast_invcdf_constant(d::InterpolatedConstant, u::AbstractVector)
     end
     edges[ngrid+1] = grid[end]
     values = d.unnormalized_pdf.coefs
-    # Bin widths
     bin_widths = diff(edges)
     # Calculate weights
     unnorm_weights = values .* bin_widths
@@ -60,15 +55,10 @@ function fast_invcdf_constant(d::InterpolatedConstant, u::AbstractVector)
     return _invcdf_constant_scalar.(u, Ref(edges), Ref(weights), Ref(cumarr))
 end
 
-# --- Shared fast invcdf for InterpolatedLinear ---
 function _invcdf_linear_scalar(u, grid, values, cdf_grid, integral)
     # Handle edge cases
-    if u <= 0.0
-        return grid[1]
-    end
-    if u >= 1.0
-        return grid[end]
-    end
+    u <= zero(u) && return grid[1]
+    u >= one(u) && return grid[end]
 
     # For 0 < u < 1
     idx = searchsortedfirst(cdf_grid, u)
