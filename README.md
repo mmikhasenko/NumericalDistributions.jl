@@ -41,6 +41,8 @@ dist = NumericallyIntegrable(f, (0.3, 1.5))
 pdf(dist, 0.77)  # returns the probability density at x=0.77
 
 # Generate random samples
+ # uses tabulated CDF with Constant interpolation
+# default n_sampling_bins is 300
 samples = rand(dist, 1000)
 
 # Compute CDF
@@ -53,6 +55,7 @@ The package provides an `interpolated` constructor for creating distributions ba
 
 ```julia
 using NumericalDistributions
+using NumericalDistributions.Interpolated
 
 # Create an interpolated distribution with constant degree
 a = interpolated(x -> abs(x), -2:0.5:1; degree = Constant())
@@ -107,11 +110,39 @@ See the docstring for `fft_convolve` for more details and options.
 
 ## Implementation Details
 
-The package uses numerical integration (via `QuadGK.jl`) to normalize the PDF and compute the CDF. For sampling, it uses a binned approximation of the CDF inversion method with a linear interpolation scheme.
+The package uses numerical integration (by default via `QuadGK.jl`) to normalize the PDF and compute the CDF. For sampling, it uses a binned approximation of the CDF inversion method with a linear interpolation scheme.
 
 For distributions with infinite support, a tangent transformation is used to map the infinite interval to (-1,1) before binning.
 
 The `Interpolated` constructor leverages the `Interpolations.jl` package to create distributions from user-provided functions and grid points. It supports both `Constant()` and `Linear()` interpolation degrees, allowing for different levels of smoothness in the resulting distribution.
+
+## Custom Integration Methods
+
+NumericalDistributions.jl uses `QuadGK.jl` for integration by default, but one can specify an alternative integration methods by defining how `NumericalDistributions.integral` behaves for their custom types passed as `unnormalized_pdf`.
+
+```julia
+using NumericalDistributions
+
+struct FullPeriodSinCosSquared{T}
+    which::T
+end
+(o::FullPeriodSinCosSquared)(x::Number) = o.which(x)^2
+
+# Define custom integration method
+NumericalDistributions.integral(o::FullPeriodSinCosSquared, a::Real, b::Real) = (b - a) / 2
+
+# Create distributions with custom integration
+d_sin = NumericallyIntegrable(FullPeriodSinCosSquared(sin), (0, 2π))
+d_cos = NumericallyIntegrable(FullPeriodSinCosSquared(cos), (0, 2π))
+
+d_sin.integral # π
+d_cos.integral # π
+```
+
+Implement alternative integration methods by extending `NumericalDistributions.integral` for your custom types:
+- Simple summation for binned data
+- Trapezoid rule
+- Custom analytical solutions
 
 ## Contributing
 
