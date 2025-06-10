@@ -1,4 +1,14 @@
 
+"""
+    integral(itr::Interpolations.GriddedInterpolation{T,N,TC,Gridded{ST},K}, a::Real, b::Real) where {T,N,TC,ST<:Interpolations.Constant,K}
+
+Specialized analytical integration for constant-interpolated functions with precise bin handling.
+Features:
+- Constructs half-bin edges for proper representation of piecewise constant functions
+- Handles partial bin integration at boundaries with exact formulas
+- Efficiently processes contiguous bins using direct multiplication
+- Provides exact integration without numerical approximation errors
+"""
 function integral(
     itr::Interpolations.GriddedInterpolation{T,N,TC,Gridded{ST},K},
     a::Real,
@@ -39,6 +49,17 @@ function integral(
     return s
 end
 
+"""
+    integral(itr::Interpolations.GriddedInterpolation{T,N,TC,Gridded{ST},K}, a::Real, b::Real) where {T,N,TC,ST<:Interpolations.Linear,K}
+
+Specialized analytical integration for linearly-interpolated functions with bin-by-bin processing.
+Implementation highlights:
+- Early return optimization for zero-width integration ranges
+- Precise bin location using binary search
+- Optimized handling of full and partial bins with analytical formulas
+- Type promotion to preserve numerical precision across mixed argument types
+- Direct computation without numerical quadrature approximation
+"""
 function integral(
     itr::Interpolations.GriddedInterpolation{T,N,TC,Gridded{ST},K},
     a::Real,
@@ -85,6 +106,14 @@ function integral(
     return s
 end
 
+"""
+    in_bin_linear_integrate(x1, x2, y1, y2, x)
+
+Helper for analytically integrating a single linear segment within a specified range.
+Implements the exact formula for the integral of a line from x1 to x:
+∫[x1→x] (y1 + m(t-x1)) dt = (x-x1)·y1 + 0.5·m·(x-x1)²
+where m is the slope (y2-y1)/(x2-x1).
+"""
 function in_bin_linear_integrate(x1, x2, y1, y2, x)
     h = x2 - x1
     m = (y2 - y1) / h

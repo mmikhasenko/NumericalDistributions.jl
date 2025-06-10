@@ -1,7 +1,12 @@
 """
     _fft_convolve(y1::AbstractVector, y2::AbstractVector; Δ, t0_1=0.0, t0_2=0.0, pow2=true)
 
-Internal: Numerically convolve two vectors of values using FFTW. Returns the new grid and convolution result as vectors.
+Internal FFT-based convolution implementation optimized for performance.
+Key optimizations include:
+- Optional power-of-2 padding for faster FFT operations
+- In-place zero padding to minimize memory allocation
+- Domain tracking to correctly position the resulting convolution
+- Direct use of FFTW.jl for efficient computation
 """
 function _fft_convolve(y1::AbstractVector, y2::AbstractVector; Δ, t0_1, t0_2, pow2 = true)
     M, N = length(y1), length(y2)
@@ -17,9 +22,12 @@ function _fft_convolve(y1::AbstractVector, y2::AbstractVector; Δ, t0_1, t0_2, p
 end
 
 """
-    fft_convolve(y1::AbstractVector, y2::AbstractVector; Δ, t0_1=0.0, t0_2=0.0, pow2=true, degree=Linear())
+    fft_convolve(y1::AbstractVector, y2::AbstractVector; Δ, t0_1=0.0, t0_2=0.0, pow2=true)
 
-Numerically convolve two vectors of values and return a NumericallyIntegrable distribution.
+FFT-accelerated convolution for raw PDF vectors that preserves normalization and domain information.
+This lower-level interface directly accepts PDF values on a grid and handles the grid properly
+by tracking the domain boundaries. The result is automatically wrapped as a distribution object
+with linear interpolation for smooth representation.
 """
 function fft_convolve(y1::AbstractVector, y2::AbstractVector; Δ, t0_1, t0_2, pow2 = true)
     t, h = _fft_convolve(y1, y2; Δ, t0_1, t0_2, pow2)
@@ -28,9 +36,41 @@ function fft_convolve(y1::AbstractVector, y2::AbstractVector; Δ, t0_1, t0_2, po
 end
 
 """
-    fft_convolve(d1::ContinuousUnivariateDistribution, d2::ContinuousUnivariateDistribution; pow2=true, degree=Linear(), gridsize=1000)
+    fft_convolve(d1::ContinuousUnivariateDistribution, d2::ContinuousUnivariateDistribution;
+                pow2=true, gridsize=1000)
 
-Numerically convolve two probability density functions (PDFs) using FFTW. Accepts any objects that are subtypes of `ContinuousUnivariateDistribution` (e.g., `NumericallyIntegrable`, `interpolated`, or standard continuous distributions).
+Computes the distribution of the convolution of two independent random variables using FFT.
+
+The method works with univariate distributions (`<:Distributions.ContinuousUnivariateDistribution`).
+The grid spacing is determined using the supports of the input distributions and gridsize.
+
+# Arguments
+- `d1::ContinuousUnivariateDistribution`: First distribution to convolve
+- `d2::ContinuousUnivariateDistribution`: Second distribution to convolve
+- `pow2::Bool=true`: Whether to pad arrays to powers of 2 for faster FFT computation
+- `gridsize::Int=1000`: Number of grid points to use when sampling each distribution.
+  Higher values increase accuracy but also increase memory usage and computation time
+
+# Returns
+- `NumericallyIntegrable`: A distribution representing the convolution of `d1` and `d2`,
+  implemented as a linearly interpolated numerical distribution
+
+# Notes
+- Both input distributions must have finite support. For distributions with infinite support,
+  use `Truncated` from Distributions.jl to create finite support approximations
+- The resulting distribution's support will be the sum of the supports of the input distributions
+- Computational complexity is O(n log n) where n is proportional to gridsize
+
+# Example
+````julia
+using NumericalDistributions
+using Distributions
+
+d1 = truncated(Normal(0, 1), -3, 3)
+d2 = truncated(Gamma(2, 1), 0, 10)
+d_conv = fft_convolve(d1, d2)
+````
+
 """
 function fft_convolve(
     d1::ContinuousUnivariateDistribution,

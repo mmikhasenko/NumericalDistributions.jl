@@ -33,12 +33,35 @@ struct NumericallyIntegrable{F,T<:Real,I} <: ContinuousUnivariateDistribution
         new{F,T,I}(f, _integral, support, n_sampling_bins)
     end
 end
+
+"""
+    integral(f, a::Real, b::Real)
+
+Default numerical integration using adaptive Gauss-Kronrod quadrature via QuadGK.jl.
+This method can be extended for custom function types to provide specialized integration algorithms,
+as demonstrated in the README's custom integration example.
+"""
 integral(f, a::Real, b::Real) = quadgk(f, a, b)[1]
 
+"""
+    pdf(d::NumericallyIntegrable, x::Real)
+
+Specialized PDF implementation that automatically handles normalization and support boundaries.
+Divides the unnormalized PDF by the precomputed normalization integral and returns zero outside
+the distribution's support range.
+"""
 function Distributions.pdf(d::NumericallyIntegrable, x::Real)
     return d.support[1] <= x <= d.support[2] ? d.unnormalized_pdf(x) / d.integral : zero(x)
 end
 
+"""
+    cdf(d::NumericallyIntegrable, x::Real)
+
+Dynamic CDF implementation that computes the cumulative probability through numerical integration.
+Unlike most Distributions.jl types that have analytical CDFs, this method performs on-demand
+integration of the unnormalized PDF from the lower support bound to `x`, normalized by the
+total integral of the distribution.
+"""
 function Distributions.cdf(d::NumericallyIntegrable, x::Real)
     x ≤ d.support[1] && return zero(x)
     x ≥ d.support[2] && return one(x)
@@ -47,5 +70,16 @@ function Distributions.cdf(d::NumericallyIntegrable, x::Real)
 end
 
 # Required method implementations for Distributions.jl interface
+"""
+    minimum(d::NumericallyIntegrable)
+
+Direct access to the lower bound of the distribution's support from the stored tuple.
+"""
 Distributions.minimum(d::NumericallyIntegrable) = d.support[1]
+
+"""
+    maximum(d::NumericallyIntegrable)
+
+Direct access to the upper bound of the distribution's support from the stored tuple.
+"""
 Distributions.maximum(d::NumericallyIntegrable) = d.support[2]
