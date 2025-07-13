@@ -65,7 +65,7 @@ total integral of the distribution.
 function Distributions.cdf(d::NumericallyIntegrable, x::Real)
     x ≤ d.support[1] && return zero(x)
     x ≥ d.support[2] && return one(x)
-    _integral = integral(x -> d.unnormalized_pdf(x), d.support[1], x)
+    _integral = integral(d.unnormalized_pdf, d.support[1], x)
     return _integral / d.integral
 end
 
