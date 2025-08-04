@@ -44,6 +44,20 @@ as demonstrated in the README's custom integration example.
 integral(f, a::Real, b::Real) = quadgk(f, a, b)[1]
 
 """
+    integral(d::NumericallyIntegrable, a::Real, b::Real)
+
+Compute the integral of the distribution over the interval [a, b].
+The integration bounds are automatically clamped to the distribution's support range.
+Returns the normalized integral value (probability mass in the interval).
+"""
+function integral(d::NumericallyIntegrable, a::Real, b::Real)
+    newa = max(a, d.support[1])
+    newb = min(b, d.support[2])
+    _integral = integral(d.unnormalized_pdf, newa, newb)
+    return _integral / d.integral
+end
+
+"""
     pdf(d::NumericallyIntegrable, x::Real)
 
 Specialized PDF implementation that automatically handles normalization and support boundaries.

@@ -31,6 +31,7 @@ export pdf, cdf, quantile
 include("types.jl")
 include("moments.jl")
 
+export integral
 include("interpolate-integral.jl")
 
 export interpolated # method

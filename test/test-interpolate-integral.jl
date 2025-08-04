@@ -1,5 +1,4 @@
 using NumericalDistributions
-using NumericalDistributions: integral  # Import integral explicitly since it's no longer exported
 using Interpolations
 using Test
 using QuadGK
