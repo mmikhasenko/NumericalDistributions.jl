@@ -54,8 +54,13 @@ end
     # Test with different distribution - uniform on [0, 1]
     uniform_f(x) = (0 <= x <= 1) ? 1.0 : 0.0
     uniform_d = NumericallyIntegrable(uniform_f, (0, 1))
-    
+
     @test integral(uniform_d, 0, 1) ≈ 1.0
     @test integral(uniform_d, 0.25, 0.75) ≈ 0.5
     @test integral(uniform_d, -1, 2) ≈ 1.0  # clamped to [0, 1]
+
+    # Test the main bug fix: reversed bounds (a > b)
+    @test integral(d, 1, 0) ≈ -integral(d, 0, 1)
+    @test integral(d, 2, -2) ≈ -1.0
+    @test integral(uniform_d, 1, 0) ≈ -1.0
 end

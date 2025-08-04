@@ -51,8 +51,14 @@ The integration bounds are automatically clamped to the distribution's support r
 Returns the normalized integral value (probability mass in the interval).
 """
 function integral(d::NumericallyIntegrable, a::Real, b::Real)
-    newa = max(a, d.support[1])
-    newb = min(b, d.support[2])
+    a > b && return -integral(d, b, a) # consistent with quadgk behavior
+    left_bound = minimum(d)
+    right_bound = maximum(d)
+    a >= right_bound && return zero(a)
+    b <= left_bound && return zero(b)
+    #
+    newa = max(a, left_bound)
+    newb = min(b, right_bound)
     _integral = integral(d.unnormalized_pdf, newa, newb)
     return _integral / d.integral
 end
