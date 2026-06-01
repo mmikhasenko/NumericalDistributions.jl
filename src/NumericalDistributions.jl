@@ -40,7 +40,8 @@ include("interpolated.jl")
 export invcdf
 include("sampling.jl")
 
-export fft_convolve
+export fft_convolve, generic_fft, generic_ifft
+include("generic_fft.jl")
 include("convolution.jl")
 
 
