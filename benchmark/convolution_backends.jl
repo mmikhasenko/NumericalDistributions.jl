@@ -64,14 +64,14 @@ function timing_table()
 end
 
 function tracked_timing()
-    println("\n## ReverseDiff tracked vector (n1=n2=201)\n")
+    println("\n## ReverseDiff tracked vector (n1=n2=201, :auto → :direct)\n")
     y1, y2, Δ, t0_1, t0_2 = make_problem(201, 201)
     y2t = ReverseDiff.track.(y2)
     kw = (; Δ, t0_1, t0_2)
-    t_gen = @belapsed NumericalDistributions._generic_fft_convolve($y1, $y2t; $kw...)
+    t_auto = @belapsed NumericalDistributions._convolve_vectors($y1, $y2t; $kw...)
     t_dir = @belapsed NumericalDistributions._direct_convolve($y1, $y2t; $kw...)
-    @printf("generic: %.1f μs\n", t_gen * 1e6)
-    @printf("direct:  %.1f μs (%.1f× vs generic)\n", t_dir * 1e6, t_dir / t_gen)
+    @printf(":auto:   %.1f μs\n", t_auto * 1e6)
+    @printf(":direct: %.1f μs\n", t_dir * 1e6)
 end
 
 println("# Convolution backend benchmark")

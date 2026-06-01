@@ -2,7 +2,7 @@
 #
 # Backends (`algorithm` keyword):
 #   :fftw    — FFTW via AbstractFFTs (Float32/64 and complex counterparts)
-#   :generic — parametric FFT in generic_fft.jl (AD-friendly types)
+#   :generic — GenericFFT.jl (AbstractFloat / complex; not AD scalar types yet)
 #   :direct  — O(M·N) reference convolution
 #   :auto    — :fftw when supported, else :generic (or :direct if padded length is huge)
 
@@ -37,7 +37,10 @@ function _default_convolution_algorithm(y1::AbstractVector, y2::AbstractVector; 
         return :fftw
     end
     L, _ = _padded_convolution_length(y1, y2; pow2)
-    return L <= GENERIC_FFT_AUTO_MAX_LENGTH ? :generic : :direct
+    if generic_fft_supported(y1, y2) && L <= GENERIC_FFT_AUTO_MAX_LENGTH
+        return :generic
+    end
+    return :direct
 end
 
 function _resolve_convolution_algorithm(
@@ -54,6 +57,12 @@ function _resolve_convolution_algorithm(
         T = promote_type(eltype(y1), eltype(y2))
         error(
             "fft_convolve: FFTW backend does not support element type $T; use `algorithm = :generic`, `:direct`, or `:auto`",
+        )
+    end
+    if algorithm === :generic && !generic_fft_supported(y1, y2)
+        T = promote_type(eltype(y1), eltype(y2))
+        error(
+            "fft_convolve: GenericFFT backend does not support element type $T; use `algorithm = :direct` or `:auto`",
         )
     end
     return algorithm
@@ -145,7 +154,7 @@ Convolve two sampled PDF vectors on uniform grids with spacing `Δ`, returning a
 - `:auto` — `:fftw` for `Float32`/`Float64`/complex machine types; otherwise `:generic`
   when the padded length is ≤ `GENERIC_FFT_AUTO_MAX_LENGTH`, else `:direct`
 - `:fftw` — FFTW (requires FFTW-supported element types)
-- `:generic` — type-parametric FFT (e.g. `ReverseDiff.TrackedReal`, `ForwardDiff.Dual`)
+- `:generic` — [GenericFFT.jl](https://github.com/JuliaApproximation/GenericFFT.jl) for `AbstractFloat` types FFTW skips (e.g. `BigFloat`)
 - `:direct` — O(M·N) reference convolution (always AD-traceable, slow for large grids)
 
 `pow2` pads to the next power of two before FFT-based backends (ignored by `:direct`).

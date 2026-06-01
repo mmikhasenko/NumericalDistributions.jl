@@ -14,6 +14,7 @@ via integration and implements sampling through numerical CDF inversion.
 module NumericalDistributions
 
 using FFTW
+using GenericFFT
 using Interpolations
 using Distributions
 using Parameters

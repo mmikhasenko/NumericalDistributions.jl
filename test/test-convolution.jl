@@ -116,15 +116,15 @@ end
     y2 = pdf.(Normal(0, σ), x2)
     kw = (; Δ = Δ, t0_1 = first(x1), t0_2 = first(x2))
     @test fft_convolve(y1, y2; kw...) isa NumericallyIntegrable
-    @test fft_convolve(y1, y2; kw..., algorithm = :generic) isa NumericallyIntegrable
     @test fft_convolve(y1, y2; kw..., algorithm = :direct) isa NumericallyIntegrable
+    @test_throws ErrorException fft_convolve(y1, y2; kw..., algorithm = :generic)
     _, h_auto = NumericalDistributions._convolve_vectors(y1, y2; kw...)
-    _, h_gen = NumericalDistributions._convolve_vectors(y1, y2; kw..., algorithm = :generic)
-    @test h_auto ≈ h_gen
+    _, h_dir = NumericalDistributions._convolve_vectors(y1, y2; kw..., algorithm = :direct)
+    @test h_auto ≈ h_dir
     f(σ_vec) = begin
         σ_val = σ_vec[1]
         y2′ = pdf.(Normal(0, σ_val), x2)
-        _, h = NumericalDistributions._convolve_vectors(y1, y2′; kw..., algorithm = :generic)
+        _, h = NumericalDistributions._convolve_vectors(y1, y2′; kw..., algorithm = :direct)
         sum(h)
     end
     σ0 = [0.3]
@@ -149,6 +149,6 @@ end
         y2t;
         algorithm = :auto,
         pow2 = true,
-    ) == :generic
+    ) == :direct
     @test_throws ErrorException fft_convolve(y1, y2t; Δ = 0.1, t0_1 = 0.0, t0_2 = 0.0, algorithm = :fftw)
 end

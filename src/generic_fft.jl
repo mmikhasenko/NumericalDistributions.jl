@@ -1,70 +1,35 @@
-# Parametric FFT/IFFT (Cooley–Tukey for power-of-two lengths, naive DFT otherwise).
-# Intended for types that FFTW does not support (TrackedReal, Dual, etc.).
-# A future GenericFFT.jl package can supersede this module.
+# Wrappers around GenericFFT.jl (https://github.com/JuliaApproximation/GenericFFT.jl).
+# Used by the `:generic` convolution backend for element types FFTW does not support,
+# including extended-precision floats. AD types (e.g. ReverseDiff.TrackedReal) are not
+# supported by GenericFFT yet; `:auto` selects `:direct` for those.
+
+using GenericFFT: generic_fft as _generic_fft_impl, generic_ifft as _generic_ifft_impl
+
+const _generic_ifft = x -> _generic_ifft_impl(x, 1)
+const _GENERIC_FFT_ELTYPE = Union{AbstractFloat, Complex{<:AbstractFloat}}
 
 """
     generic_fft(x::AbstractVector)
 
-Discrete Fourier transform using a type-parametric algorithm (`+`, `*`, `cis`).
-Matches the `FFTW.fft` convention (forward sign ``-2\\pi i k / n``).
-
-For length `n` that is a power of two, uses Cooley–Tukey ``O(n \\log n)``.
-Otherwise uses a naive ``O(n^2)`` DFT (suitable for small `n` only).
+Forward FFT via [GenericFFT.jl](https://github.com/JuliaApproximation/GenericFFT.jl),
+matching the `FFTW.fft` convention. Requires `eltype(x)` to be `AbstractFloat` or
+`Complex{<:AbstractFloat}`.
 """
-function generic_fft(x::AbstractVector)
-    n = length(x)
-    n == 0 && return eltype(x)[]
-    Tx = eltype(x)
-    Tc = typeof(complex(one(Tx)))
-    xc = map(Tc, x)
-    if ispow2(n)
-        return _generic_fft_pow2(xc)
+function generic_fft(x::AbstractVector{T}) where {T<:_GENERIC_FFT_ELTYPE}
+    if T <: Real
+        return _generic_fft_impl(complex.(x))
     end
-    return _generic_dft_forward(xc)
+    return _generic_fft_impl(x)
 end
 
 """
     generic_ifft(x::AbstractVector)
 
-Inverse DFT matching `FFTW.ifft` (includes `1/n` scaling).
+Inverse FFT via GenericFFT.jl (includes `1/n` scaling).
 """
-function generic_ifft(x::AbstractVector)
-    n = length(x)
-    n == 0 && return eltype(x)[]
-    y = conj.(generic_fft(conj.(x)))
-    invn = one(eltype(y)) / n
-    return y .* invn
-end
+generic_ifft(x::AbstractVector{<:_GENERIC_FFT_ELTYPE}) = _generic_ifft(x)
 
-function _generic_fft_pow2(x::AbstractVector{T}) where {T}
-    n = length(x)
-    n == 1 && return copy(x)
-    @assert ispow2(n)
-    half = n ÷ 2
-    ev = _generic_fft_pow2(@view x[1:2:n-1])
-    od = _generic_fft_pow2(@view x[2:2:n])
-    out = similar(x, n)
-    ω = cis(-2 * pi / n)
-    w = one(T)
-    @inbounds for k in 1:half
-        t = w * od[k]
-        ek = ev[k]
-        out[k] = ek + t
-        out[k + half] = ek - t
-        w *= ω
-    end
-    return out
-end
+generic_fft_supported(::Type{T}) where {T} = T <: _GENERIC_FFT_ELTYPE
 
-function _generic_dft_forward(x::AbstractVector{T}) where {T}
-    n = length(x)
-    out = similar(x, n)
-    @inbounds for k in 1:n
-        s = zero(T)
-        for j in 1:n
-            s += x[j] * cis(-2 * pi * (k - 1) * (j - 1) / n)
-        end
-        out[k] = s
-    end
-    return out
-end
+generic_fft_supported(y1::AbstractVector, y2::AbstractVector) =
+    generic_fft_supported(promote_type(eltype(y1), eltype(y2)))
