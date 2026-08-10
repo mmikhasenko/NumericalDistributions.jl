@@ -14,6 +14,7 @@ via integration and implements sampling through numerical CDF inversion.
 module NumericalDistributions
 
 using FFTW
+using GenericFFT
 using Interpolations
 using Distributions
 using Parameters
@@ -40,7 +41,8 @@ include("interpolated.jl")
 export invcdf
 include("sampling.jl")
 
-export fft_convolve
+export fft_convolve, generic_fft, generic_ifft
+include("generic_fft.jl")
 include("convolution.jl")
 
 
